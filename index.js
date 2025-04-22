@@ -16,7 +16,7 @@ var exchangeAPI = {};
 logger.info('--- Loading Exchange API');
 
 // make exchange module dynamic later
-if (process.env.activeExchange == 'binance'){
+if (process.env.activeExchange == 'binance') {
   logger.info('--- \tActive Exchange:' + process.env.activeExchange);
   // activePairs = process.env.binancePairs;
 
@@ -38,7 +38,7 @@ var botOptions = {
       paths: process.env.binanceColumns.split(','),
       start: process.env.binanceStartingPoint
     },
-    storage: {
+    storage: { 
       logHistory: false
     },
     trading: {
@@ -53,7 +53,7 @@ var botOptions = {
     options: botOptions,
     storage: {
       trading: {
-      // queued triplets
+        // queued triplets
         queue: [],
         // actively trading triplets
         active: []
@@ -66,8 +66,8 @@ var botOptions = {
     exchange: exchangeAPI
   };
 
-ctrl.UI       = require('./lib/UI')(ctrl.options),
-ctrl.events   = require('./lib/EventsCore')(ctrl);
+ctrl.UI = require('./lib/UI')(ctrl.options),
+ctrl.events = require('./lib/EventsCore')(ctrl);
 
 // We're ready to start. Load up the webhook streams and start making it rain.
 require('./lib/BotCore')(ctrl);

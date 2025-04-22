@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo 'test logic not done yet'",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
     "debug": "node --inspect index.js"
   },
   "repository": {
