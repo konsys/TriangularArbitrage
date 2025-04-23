@@ -1,47 +1,68 @@
+import { Controller } from './Controller';
 import TradingCore from './TradingCore';
-import {DBHelpers} from './DBHelpers';
-import {PairRanker} from './PairRanker';
+import { DBHelpers } from './DBHelpers';
+import { PairRanker } from './PairRanker';
 
-module.exports = (ctrl) => {
-    this.dbHelpers = new DBHelpers();
-    this.pairRanker = new PairRanker();
+interface Stream {
+    arr: any[];
+}
 
-    // every pingback from the websocket(s)
-    ctrl.storage.streamTick = (stream, streamID) => {
+interface Storage {
+    streams: Record<string, Stream>;
+    candidates: any[];
+    pairRanks: any;
+    trading: {
+        queue: any[];
+    };
+}
+
+interface Options {
+    arbitrage: any;
+    storage: {
+        logHistory: boolean;
+    };
+}
+
+interface Ctrl {
+    storage: Storage;
+    options: Options;
+    currencyCore: any;
+    UI: {
+        updateArbitageOpportunities(candidates: any[]): void;
+    };
+    logger: {
+        info(message: string): void;
+    };
+}
+
+export default (ctrl: Ctrl): void => {
+    const dbHelpers = new DBHelpers();
+    const pairRanker = new PairRanker();
+
+    ctrl.storage.streamTick = (stream: Stream, streamID: string): void => {
         ctrl.storage.streams[streamID] = stream;
 
-        if (streamID == 'allMarketTickers') {
-            // Run logic to check for arbitrage opportunities
+        if (streamID === 'allMarketTickers') {
             ctrl.storage.candidates = ctrl.currencyCore.getDynamicCandidatesFromStream(stream, ctrl.options.arbitrage);
 
-            // Run logic to check for each pairs ranking
-            const pairToTrade = this.pairRanker.getPairRanking(ctrl.storage.candidates, ctrl.storage.pairRanks, ctrl, ctrl.logger);
-            if (pairToTrade != 'none') {
-                // console.log("<----GO TRADE---->");
-            }
+            const pairToTrade = pairRanker.getPairRanking(ctrl.storage.candidates, ctrl.storage.pairRanks, ctrl, ctrl.logger);
+            if (pairToTrade !== 'none') {}
 
-            // queue potential trades
-            if (this.tradingCore)
-                this.tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
+            if (tradingCore)
+                tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
 
-            // update UI with latest values per currency
             ctrl.UI.updateArbitageOpportunities(ctrl.storage.candidates);
 
             if (ctrl.options.storage.logHistory) {
-                // Log arbitrage data to DB, if enabled
-                this.dbHelpers.saveArbRows(ctrl.storage.candidates, ctrl.storage.db, ctrl.logger);
-                this.dbHelpers.saveRawTick(stream.arr, ctrl.storage.db, ctrl.logger);
+                dbHelpers.saveArbRows(ctrl.storage.candidates, ctrl.storage.db, ctrl.logger);
+                dbHelpers.saveRawTick(stream.arr, ctrl.storage.db, ctrl.logger);
             }
-
         }
     };
 
-    // loading the CurrencyCore starts the streams
     ctrl.logger.info('--- Starting Currency Streams');
+
     ctrl.currencyCore = require('./CurrencyCore')(ctrl);
 
-    this.tradingCore = TradingCore(ctrl.options.trading, ctrl.currencyCore);
-    // use this for callbacks for ongoing trade workflows
-    // this.tradingCore.on('queueUpdated', (queue, timeStarted)=>{  });
-    // this.tradingCore.on('newTradeQueued', (candidate, timeStarted)=>{  });
+    const tradingCore = TradingCore(ctrl.options.trading, ctrl.currencyCore);
 };
