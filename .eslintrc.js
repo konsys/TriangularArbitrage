@@ -32,12 +32,11 @@ module.exports = {
     "no-unreachable": ["warn"],
     "no-unused-vars": ["warn"],
     "quotes": [2, "single", "avoid-escape"],
-    "block-scoped-var": 2,
+    "block-scoped-const": "off",
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
     "computed-property-spacing": [2, "never"],
     "keyword-spacing": 2,
     "space-unary-ops": 2
-
 
   }
 };

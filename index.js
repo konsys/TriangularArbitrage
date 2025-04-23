@@ -1,7 +1,7 @@
 // load logger library
 const logger = require('./lib/LoggerCore');
 
-var env = require('node-env-file');
+const env = require('node-env-file');
 try {
   env(__dirname + '/.keys');
 } catch (e) {
@@ -11,7 +11,7 @@ env(__dirname + '/conf.ini');
 
 logger.info('\n\n\n----- Bot Starting : -----\n\n\n');
 
-var exchangeAPI = {};
+let exchangeAPI = {};
 
 logger.info('--- Loading Exchange API');
 
@@ -30,7 +30,7 @@ if (process.env.activeExchange == 'binance') {
   exchangeAPI.WS = new api.BinanceWS(beautifyResponse);
 }
 
-var botOptions = {
+const botOptions = {
     UI: {
       title: 'Top Potential Arbitrage Triplets, via: ' + process.env.binanceColumns
     },
