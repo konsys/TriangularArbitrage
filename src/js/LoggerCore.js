@@ -6,17 +6,17 @@ if (!fs.existsSync(logDir)) {
 }
 
 // prepare logging
-const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, label, printf } = format;
+const {createLogger, format, transports} = require('winston');
+const {combine, timestamp, label, printf} = format;
 
 const tsFormat = () => (new Date()).toLocaleTimeString();
 const myFormat = printf(info => {
   return `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`;
 });
 
-const logger = createLogger({
+export const Logger = createLogger({
   format: combine(
-    label({ label: '' }),
+    label({label: ''}),
     timestamp(),
     myFormat
   ),
@@ -40,4 +40,4 @@ const logger = createLogger({
   ]
 });
 
-module.exports = logger;
+

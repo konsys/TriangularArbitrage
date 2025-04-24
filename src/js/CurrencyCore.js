@@ -1,12 +1,14 @@
+const {CurrencySelector} = require('./CurrencySelector');
 const CurrencyCore = {};
 let controller = {};
 
 CurrencyCore.events = {};
-CurrencyCore.events.onAllTickerStream = ()=>{},
+CurrencyCore.events.onAllTickerStream = () => {
+},
 
 // constructor
 CurrencyCore.init = (ctrl) => {
-  if (!ctrl.exchange){
+  if (!ctrl.exchange) {
     throw 'Undefined currency exchange connector. Will not be able to communicate with exchange API.';
   }
 
@@ -15,7 +17,7 @@ CurrencyCore.init = (ctrl) => {
   CurrencyCore.sockets = {},
   CurrencyCore.streams = {},
   controller = ctrl,
-  CurrencyCore.steps = ['BTC','ETH','BNB','USDT'];
+  CurrencyCore.steps = ['BTC', 'ETH', 'BNB', 'USDT'];
 
   //CurrencyCore.startWSockets(exchange, ctrl);
   CurrencyCore.startAllTickerStream(ctrl.exchange, ctrl);
@@ -24,26 +26,26 @@ CurrencyCore.init = (ctrl) => {
   return CurrencyCore;
 };
 
-CurrencyCore.queueTicker = (interval)=>{
+CurrencyCore.queueTicker = (interval) => {
   if (!interval) interval = 3000;
-  setTimeout(()=>{
+  setTimeout(() => {
     CurrencyCore.queueTicker(interval);
   }, interval);
   CurrencyCore.tick();
 };
 
-CurrencyCore.tick = ()=>{
+CurrencyCore.tick = () => {
   //debugger;
 };
 
-CurrencyCore.getCurrencyFromStream = (stream, fromCur, toCur)=>{
+CurrencyCore.getCurrencyFromStream = (stream, fromCur, toCur) => {
   if (!stream || !fromCur || !toCur) return;
 
   /*
    Binance uses xxxBTC notation. If we're looking at xxxBTC and we want to go from BTC to xxx, that means we're buying, vice versa for selling.
   */
   let currency = stream.obj[toCur + fromCur];
-  if (currency){
+  if (currency) {
     // found a match using reversed binance syntax, meaning we're buying if we're going from->to (btc->xxx in xxxBTC ticker) using a fromCurtoCur ticker.
     currency.flipped = false;
     currency.rate = currency.a;
@@ -52,11 +54,11 @@ CurrencyCore.getCurrencyFromStream = (stream, fromCur, toCur)=>{
     // ask == trying to buy
   } else {
     currency = stream.obj[fromCur + toCur];
-    if (!currency){
+    if (!currency) {
       return false;
     }
     currency.flipped = true;
-    currency.rate = (1/currency.b);
+    currency.rate = (1 / currency.b);
 
     // BTCBNB
     // bid == im trying to sell.
@@ -75,7 +77,7 @@ CurrencyCore.getCurrencyFromStream = (stream, fromCur, toCur)=>{
   return currency;
 };
 
-CurrencyCore.getArbitageRate = (stream, step1, step2, step3)=>{
+CurrencyCore.getArbitageRate = (stream, step1, step2, step3) => {
   if (!stream || !step1 || !step2 || !step3) return;
   const ret = {
     a: CurrencyCore.getCurrencyFromStream(stream, step1, step2),
@@ -89,7 +91,7 @@ CurrencyCore.getArbitageRate = (stream, step1, step2, step3)=>{
   return ret;
 };
 
-CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair)=>{
+CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair) => {
   const keys = {
     a: aPair.toUpperCase(),
     b: bPair.toUpperCase(),
@@ -100,7 +102,9 @@ CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair)=>{
   const bpairs = stream.markets[keys.b];
 
   const akeys = [];
-  apairs.map((obj, i, array)=>{ akeys[obj.s.replace(keys.a, '')] = obj; });
+  apairs.map((obj, i, array) => {
+    akeys[obj.s.replace(keys.a, '')] = obj;
+  });
 
   // prevent 1-steps
   delete akeys[keys.b];
@@ -111,9 +115,9 @@ CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair)=>{
       If it does, run arbitrage math
   */
   const bmatches = [];
-  for (let i=0;i<bpairs.length;i++){
+  for (let i = 0; i < bpairs.length; i++) {
     const bPairTicker = bpairs[i];
-    bPairTicker.key = bPairTicker.s.replace(keys.b,'');
+    bPairTicker.key = bPairTicker.s.replace(keys.b, '');
 
     // from B to C
     bPairTicker.startsWithKey = bPairTicker.s.startsWith(keys.b);
@@ -121,20 +125,20 @@ CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair)=>{
     // from C to B
     bPairTicker.endsWithKey = bPairTicker.s.endsWith(keys.b);
 
-    if (akeys[bPairTicker.key]){
+    if (akeys[bPairTicker.key]) {
       const match = bPairTicker;
       // check price from bPairTicker.key to keys.a
 
       const stepC = CurrencyCore.getCurrencyFromStream(stream, match.key, keys.a);
 
       // only do this if we definitely found a path. Some paths are impossible, so will result in an empty stepC quote.
-      if (stepC){
+      if (stepC) {
         keys.c = match.key;
 
         const comparison = CurrencyCore.getArbitageRate(stream, keys.a, keys.b, keys.c);
 
 
-        if (comparison){
+        if (comparison) {
           // console.log('getCandidatesFromStreamViaPath: from/to a: ', comparison.a.stepFrom, comparison.a.stepTo);
           // console.log('getCandidatesFromStreamViaPath: from/to b: ', comparison.b.stepFrom, comparison.b.stepTo);
           // console.log('getCandidatesFromStreamViaPath: from/to c: ', comparison.c.stepFrom, comparison.c.stepTo);
@@ -193,28 +197,31 @@ CurrencyCore.getCandidatesFromStreamViaPath = (stream, aPair, bPair)=>{
         }
 
 
-
       }
     }
   }
 
-  if (bmatches.length){
-    bmatches.sort(function(a, b) { return parseFloat(b.rate) - parseFloat(a.rate); });
+  if (bmatches.length) {
+    bmatches.sort(function (a, b) {
+      return parseFloat(b.rate) - parseFloat(a.rate);
+    });
   }
 
   return bmatches;
 };
-CurrencyCore.getDynamicCandidatesFromStream = (stream, options)=>{
+CurrencyCore.getDynamicCandidatesFromStream = (stream, options) => {
   let matches = [];
 
-  for (let i=0;i<options.paths.length;i++){
+  for (let i = 0; i < options.paths.length; i++) {
     const pMatches = CurrencyCore.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
     matches = matches.concat(pMatches);
     // console.log("adding: " + pMatches.length + " to : " + matches.length);
   }
 
-  if (matches.length){
-    matches.sort(function(a, b) { return parseFloat(b.rate) - parseFloat(a.rate); });
+  if (matches.length) {
+    matches.sort(function (a, b) {
+      return parseFloat(b.rate) - parseFloat(a.rate);
+    });
   }
 
   return matches;
@@ -225,7 +232,7 @@ CurrencyCore.getDynamicCandidatesFromStream = (stream, options)=>{
   assumes purchase of eth via btc
   looks for a purhase via eth that leads back to btc.
 */
-CurrencyCore.getBTCETHCandidatesFromStream = (stream)=>{
+CurrencyCore.getBTCETHCandidatesFromStream = (stream) => {
   const keys = {
     a: 'btc'.toUpperCase(),
     b: 'eth'.toUpperCase(),
@@ -236,7 +243,9 @@ CurrencyCore.getBTCETHCandidatesFromStream = (stream)=>{
   const bpairs = stream.markets.ETH;
 
   const akeys = [];
-  apairs.map((obj, i, array)=>{ akeys[obj.s.replace(keys.a, '')] = obj; });
+  apairs.map((obj, i, array) => {
+    akeys[obj.s.replace(keys.a, '')] = obj;
+  });
 
   // prevent 1-steps
   delete akeys[keys.b];
@@ -247,9 +256,9 @@ CurrencyCore.getBTCETHCandidatesFromStream = (stream)=>{
       If it does, run arbitrage math
   */
   const bmatches = [];
-  for (let i=0;i<bpairs.length;i++){
+  for (let i = 0; i < bpairs.length; i++) {
     const bPairTicker = bpairs[i];
-    bPairTicker.key = bPairTicker.s.replace(keys.b,'');
+    bPairTicker.key = bPairTicker.s.replace(keys.b, '');
 
     // from B to C
     bPairTicker.startsWithKey = bPairTicker.s.startsWith(keys.b);
@@ -257,7 +266,7 @@ CurrencyCore.getBTCETHCandidatesFromStream = (stream)=>{
     // from C to B
     bPairTicker.endsWithKey = bPairTicker.s.endsWith(keys.b);
 
-    if (akeys[bPairTicker.key]){
+    if (akeys[bPairTicker.key]) {
       const match = bPairTicker;
 
       keys.c = match.key;
@@ -274,14 +283,16 @@ CurrencyCore.getBTCETHCandidatesFromStream = (stream)=>{
     }
   }
 
-  if (bmatches.length){
-    bmatches.sort(function(a, b) { return parseFloat(b.rate) - parseFloat(a.rate); });
+  if (bmatches.length) {
+    bmatches.sort(function (a, b) {
+      return parseFloat(b.rate) - parseFloat(a.rate);
+    });
   }
   return bmatches;
 };
 
 
-CurrencyCore.simpleArbitrageMath = (stream, candidates)=>{
+CurrencyCore.simpleArbitrageMath = (stream, candidates) => {
   if (!stream || !candidates) return;
   //EURUSD * (1/GBPUSD) * (1/EURGBP) = 1
 
@@ -296,26 +307,26 @@ CurrencyCore.simpleArbitrageMath = (stream, candidates)=>{
   if (!a || isNaN(a) || !b || isNaN(b) || !c || isNaN(c)) return;
 
   //btcusd : (flip/usdEth) : ethbtc
-  const d = (a.b) * (1/b.b) * (c.b);
+  const d = (a.b) * (1 / b.b) * (c.b);
   //debugger;
   return d;
 };
 
 // Fires once per second, with  all ticker data from Binance
-CurrencyCore.events.onAllTickerStream = stream =>{
+CurrencyCore.events.onAllTickerStream = stream => {
   const key = 'allMarketTickers';
 
   // Basic array from api arr[0].s = ETHBTC
   CurrencyCore.streams.allMarketTickers.arr = stream;
 
   // Mapped object arr[ETHBTC]
-  CurrencyCore.streams.allMarketTickers.obj = stream.reduce(function ( array, current ) {
+  CurrencyCore.streams.allMarketTickers.obj = stream.reduce(function (array, current) {
     array[current.s] = current;
     return array;
   }, {});
 
   // Sub objects with only data on specific markets
-  for (let i=0;i<CurrencyCore.steps.length;i++)
+  for (let i = 0; i < CurrencyCore.steps.length; i++)
     CurrencyCore.streams.allMarketTickers.markets[CurrencyCore.steps[i]] = stream.filter(e => {
       return (e.s.endsWith(CurrencyCore.steps[i]) || e.s.startsWith(CurrencyCore.steps[i]));
     });
@@ -327,14 +338,10 @@ CurrencyCore.events.onAllTickerStream = stream =>{
 };
 
 
-
-
-
-
 // starts one global stream for all selectors. Stream feeds back info every second:
 // https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md#all-market-tickers-stream
-CurrencyCore.startAllTickerStream = function(exchange){
-  if (!CurrencyCore.streams.allMarketTickers){
+CurrencyCore.startAllTickerStream = function (exchange) {
+  if (!CurrencyCore.streams.allMarketTickers) {
     CurrencyCore.streams.allMarketTickers = {};
     CurrencyCore.streams.allMarketTickers.arr = [],
     CurrencyCore.streams.allMarketTickers.obj = {};
@@ -345,12 +352,12 @@ CurrencyCore.startAllTickerStream = function(exchange){
 };
 
 // starts streams for specific selectors
-CurrencyCore.startWSockets = function(exchange, ctrl){
+CurrencyCore.startWSockets = function (exchange, ctrl) {
 
   // loop through provided csv selectors, and initiate trades & orderBook sockets for each
-  for (let i = 0;i < CurrencyCore.selectors.length;i++){
+  for (let i = 0; i < CurrencyCore.selectors.length; i++) {
 
-    let selector = require('./CurrencySelector.js')(CurrencyCore.selectors[i], exchange);
+    let selector = CurrencySelector(CurrencyCore.selectors[i], exchange);
 
     CurrencyCore.currencies[selector.key] = selector;
     CurrencyCore.currencies[selector.key].handleEvent = ctrl.events.wsEvent;

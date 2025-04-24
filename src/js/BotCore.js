@@ -1,6 +1,6 @@
-const TradingCore = require('./TradingCore');
-const DBHelpers = require('./DBHelpers').DBHelpers;
-const PairRanker = require('./PairRanker').PairRanker;
+const TradingCore = require('../TradingCore');
+const DBHelpers = require('../DBHelpers').DBHelpers;
+const PairRanker = require('../PairRanker').PairRanker;
 
 module.exports = (ctrl) => {
   this.dbHelpers = new DBHelpers();
@@ -38,7 +38,7 @@ module.exports = (ctrl) => {
 
   // loading the CurrencyCore starts the streams
   ctrl.logger.info('--- Starting Currency Streams');
-  ctrl.currencyCore = require('./CurrencyCore')(ctrl);
+  ctrl.currencyCore = require('../CurrencyCore')(ctrl);
 
   this.tradingCore = TradingCore(ctrl.options.trading, ctrl.currencyCore);
   // use this for callbacks for ongoing trade workflows

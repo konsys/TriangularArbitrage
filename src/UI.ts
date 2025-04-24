@@ -10,12 +10,6 @@ interface UIOptions {
     };
 }
 
-interface Ticker {
-    a?: { key: string; stepFrom?: string };
-    b?: { stepFrom?: string };
-    c?: { stepFrom?: string };
-    rate?: number;
-}
 
 interface Tickers {
     [key: string]: Ticker;
@@ -37,7 +31,7 @@ UI.init = (options: UIOptions) => {
         .column(UI.options.UI.title, UI.options.UI.title.length, [clc.green])
         .fill()
         .store();
-  
+
     UI.blankLine = new Line(UI.outputBuffer)
         .fill()
         .store();
@@ -86,7 +80,10 @@ UI.updateArbitageOpportunities = (tickers: Ticker[]) => {
 
     for (let i = 0; i < UI.maxRows; i++) {
         const ticker: Ticker | undefined = tickers[i];
-        if (!ticker) return;
+        if (!ticker) {
+            return
+        }
+
 
         if (ticker.a) {
 
@@ -152,7 +149,10 @@ UI.updateTickers = (tickers: Tickers) => {
     for (let i = 0; i < keys.length; i++) {
         const ticker: Ticker | undefined = tickers[keys[i]];
 
-        if (!ticker) return;
+        if (!ticker) {
+            return
+        }
+
 
         // Create line entry for each ticker
         let lineEntry = new Line(UI.outputBuffer)
@@ -175,24 +175,16 @@ UI.updateTickers = (tickers: Tickers) => {
     }
 }
 
-// Function to update user interface display based on conditions or flags passed as parameters
-// Trim old entries based on boolean flag received as parameter
-//
-/////
-/////
+interface Ticker {
+    a: { key: string; stepFrom?: string };
+    b: { stepFrom?: string };
+    c: { stepFrom?: string };
+    E: any;
+    s: any;
+    B: any;
+    A: any;
+    n: any;
+    rate: number;
+}
 
-//
-////
-////
-////
-////
-/////
-
-//
-
-// Function to add trade details into user interface display
-//
-/////
-
-// Exports initialized User Interface module
 export default UI.init;
