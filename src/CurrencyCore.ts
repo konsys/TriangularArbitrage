@@ -19,7 +19,7 @@ export class CurrencyCore {
             throw 'Undefined currency exchange connector. Will not be able to communicate with exchange API.';
         }
 
-
+        this.controller = ctrl
 
         //CurrencyCore.startWSockets(exchange, ctrl);
         this.startAllTickerStream(ctrl.exchange);
@@ -117,7 +117,9 @@ export class CurrencyCore {
         ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
         return ret;
     };
+
     getCandidatesFromStreamViaPath = (stream, aPair, bPair) => {
+ 
         const keys = {
             a: aPair.toUpperCase(),
             b: bPair.toUpperCase(),
@@ -165,9 +167,6 @@ export class CurrencyCore {
 
 
                     if (comparison) {
-                        // console.log('getCandidatesFromStreamViaPath: from/to a: ', comparison.a.stepFrom, comparison.a.stepTo);
-                        // console.log('getCandidatesFromStreamViaPath: from/to b: ', comparison.b.stepFrom, comparison.b.stepTo);
-                        // console.log('getCandidatesFromStreamViaPath: from/to c: ', comparison.c.stepFrom, comparison.c.stepTo);
 
                         const dt = new Date();
                         const triangle = {
@@ -217,9 +216,6 @@ export class CurrencyCore {
                         // debugger;
                         bmatches.push(triangle);
 
-                        // console.log('getCandidatesFromStreamViaPath: from/to a: ', triangle.a_step_from, triangle.a_step_to);
-                        // console.log('getCandidatesFromStreamViaPath: from/to b: ', triangle.b_step_from, triangle.b_step_to);
-                        // console.log('getCandidatesFromStreamViaPath: from/to c: ', triangle.c_step_from, triangle.c_step_to);
                     }
 
 

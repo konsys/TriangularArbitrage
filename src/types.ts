@@ -25,14 +25,7 @@ export interface Storage {
     pairRanks: any[];
 }
 
-export interface Ctrl {
-    options: BotOptions;
-    storage: Storage;
-    logger: any;
-    exchange: any;
-    UI?: any;
-    events?: any;
-}
+
 
 // --- Type Definitions ---
 
@@ -212,3 +205,34 @@ export interface ICurrencyCore {
     selectors?: string[]; // Optional list of selectors used by startWSockets
 }
 
+
+
+// Type Definitions (already provided in TypeScript format)
+export type TradingCoreOptions = {} // Assuming this might be more detailed elsewhere
+
+export  interface Ctrl {
+    storage: {
+        streamTick: (stream: any, streamID: string) => void;
+        streams: Record<string, any>;
+        candidates: any[];
+        pairRanks: any[];
+        trading: {
+            queue: any[];
+        };
+        db: any; // Assuming 'db' has a specific type, using 'any' for now
+    };
+    options: {
+        trading: TradingCoreOptions;
+        arbitrage: boolean;
+        storage: {
+            logHistory: boolean;
+        };
+    };
+    UI: {
+        updateArbitageOpportunities: (candidates: any[]) => void;
+    };
+    logger: {
+        info: (message: string) => void;
+    };
+    currencyCore?: any; // Assuming the type for CurrencyCore is defined elsewhere, using 'any' for now
+}

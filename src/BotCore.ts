@@ -3,40 +3,12 @@ import {TradingCore} from './TradingCore'; // Assuming TradingCore is a class or
 import {DBHelpers} from './DBHelpers'; // Assuming DBHelpers is a class
 import {PairRanker} from './PairRanker'; // Assuming PairRanker is a class
 import {CurrencyCore} from './CurrencyCore';
-
-// Type Definitions (already provided in TypeScript format)
-type TradingCoreOptions = {} // Assuming this might be more detailed elsewhere
-
-interface Ctrl {
-    storage: {
-        streamTick: (stream: any, streamID: string) => void;
-        streams: Record<string, any>;
-        candidates: any[];
-        pairRanks: any[];
-        trading: {
-            queue: any[];
-        };
-        db: any; // Assuming 'db' has a specific type, using 'any' for now
-    };
-    options: {
-        trading: TradingCoreOptions;
-        arbitrage: boolean;
-        storage: {
-            logHistory: boolean;
-        };
-    };
-    UI: {
-        updateArbitageOpportunities: (candidates: any[]) => void;
-    };
-    logger: {
-        info: (message: string) => void;
-    };
-    currencyCore?: any; // Assuming the type for CurrencyCore is defined elsewhere, using 'any' for now
-}
+import {Ctrl} from "./types";
 
 // The exported function
 export const BotCore = (ctrl: Ctrl): void => {
 
+    console.log(22222, ctrl.storage.streamTick )
     const dbHelpers = new DBHelpers();
     const pairRanker = new PairRanker();
 
@@ -45,11 +17,6 @@ export const BotCore = (ctrl: Ctrl): void => {
         ctrl.storage.streams[streamID] = stream;
 
         if (streamID === 'allMarketTickers') {
-            // Ensure currencyCore is initialized before accessing its methods
-            // Note: In the original JS, currencyCore is initialized later,
-            // but streamTick is likely called asynchronously after initialization.
-            // TypeScript might raise strict errors if currencyCore could be undefined here.
-            // Adding an explicit check, although the original logic flow implies it's set.
             if (!ctrl.currencyCore) {
                 ctrl.logger.info('Warning: currencyCore not initialized when streamTick received data.');
                 return; // Or handle appropriately

@@ -9,8 +9,6 @@ import {BotOptions, Ctrl} from "./types";
 
 async function start(){
 
-    let exchangeAPI: any = {};
-
     logger.info('--- Loading Exchange API');
 
     // if (process.env.activeExchange === 'binance') {
@@ -18,7 +16,7 @@ async function start(){
 
 
         const beautifyResponse: boolean = false;
-        exchangeAPI = new rest({
+        let exchangeAPI = new rest({
             timeout: parseInt(process.env.restTimeout as string),
             recvWindow: parseInt(process.env.restRecvWindow as string),
             disableBeautification: beautifyResponse
