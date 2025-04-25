@@ -339,7 +339,7 @@ export class CurrencyCore {
                 this.streams.allMarketTickers.obj = {};
             this.streams.allMarketTickers.markets = [];
         }
-        console.log(1111, exchange.WS)
+
         this.sockets.allMarketTickerStream = exchange.WS.onAllTickers(event => this.events.onAllTickerStream(event));
     };
 
