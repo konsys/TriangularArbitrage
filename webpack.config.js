@@ -2,12 +2,11 @@ const path = require('path');
 
 module.exports = {
   target: 'node',
-  devtool: 'inline-source-map',
+  // devtool: 'inline-source-map',
   mode: 'production',
-
-  entry: {
-    main: './src/index.ts',
-  },
+  // entry: {
+  //   main: './src/index.ts',
+  // },
 
   output: {
     path: path.join(__dirname, '/build'),

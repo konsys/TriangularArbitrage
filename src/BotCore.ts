@@ -2,7 +2,7 @@
 import {TradingCore} from './TradingCore'; // Assuming TradingCore is a class or constructor function
 import {DBHelpers} from './DBHelpers'; // Assuming DBHelpers is a class
 import {PairRanker} from './PairRanker'; // Assuming PairRanker is a class
-import CurrencyCoreFactory from './CurrencyCore';
+import {CurrencyCore} from './CurrencyCore';
 
 // Type Definitions (already provided in TypeScript format)
 type TradingCoreOptions = {} // Assuming this might be more detailed elsewhere
@@ -36,6 +36,7 @@ interface Ctrl {
 
 // The exported function
 export const BotCore = (ctrl: Ctrl): void => {
+
     const dbHelpers = new DBHelpers();
     const pairRanker = new PairRanker();
 
@@ -93,8 +94,10 @@ export const BotCore = (ctrl: Ctrl): void => {
     // The type of the required module is inferred as 'any' due to 'require'.
     // Explicit typing would be better if the structure of CurrencyCore module is known.
 
-    // @ts-ignore
-    ctrl.currencyCore = CurrencyCoreFactory(ctrl);
+
+
+
+    ctrl.currencyCore = new CurrencyCore(ctrl);
 
     // Initialize tradingCore after currencyCore is initialized
     const tradingCore = new TradingCore(ctrl.options.trading, ctrl.currencyCore);

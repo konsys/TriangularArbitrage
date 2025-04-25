@@ -42,33 +42,33 @@ interface CurrencySelectorT {
     handleEvent?: (data: any) => void;
 }
 
-export const CurrencySelector: CurrencySelectorT = {} as CurrencySelectorT; // Initialize as CurrencySelector type
+const moduleObj: CurrencySelectorT = {} as CurrencySelectorT; // Initialize as moduleObj type
 
-CurrencySelector.init = (selectorRaw: string, exchangeAPI: ExchangeAPI): CurrencySelectorT => {
+moduleObj.init = (selectorRaw: string, exchangeAPI: ExchangeAPI): CurrencySelectorT => {
     /* Currency selector stuff */
-    CurrencySelector.selectorRaw = selectorRaw;  //XRP-ETH
-    CurrencySelector.splitSelector = CurrencySelector.selectorRaw.split('-');//XRP, ETH array
-    CurrencySelector.key = CurrencySelector.splitSelector.join('');//XRPETH
-    CurrencySelector.asset = CurrencySelector.splitSelector[0];//XRP
-    CurrencySelector.selector = CurrencySelector.splitSelector[1];//ETH
+    moduleObj.selectorRaw = selectorRaw;  //XRP-ETH
+    moduleObj.splitSelector = moduleObj.selectorRaw.split('-');//XRP, ETH array
+    moduleObj.key = moduleObj.splitSelector.join('');//XRPETH
+    moduleObj.asset = moduleObj.splitSelector[0];//XRP
+    moduleObj.selector = moduleObj.splitSelector[1];//ETH
 
     // sockets stuff
-    CurrencySelector.interval = '30s';
-    CurrencySelector.exchangeAPI = exchangeAPI;
+    moduleObj.interval = '30s';
+    moduleObj.exchangeAPI = exchangeAPI;
 
     // placeholders
-    CurrencySelector.events = {};
-    CurrencySelector.trades = {};
-    CurrencySelector.orderBook = {};
-    CurrencySelector.sockets = {};
-    CurrencySelector.handleEvent = (data: any): void => {
+    moduleObj.events = {};
+    moduleObj.trades = {};
+    moduleObj.orderBook = {};
+    moduleObj.sockets = {};
+    moduleObj.handleEvent = (data: any): void => {
     }; // Provide a default empty function matching the signature
 
-    return CurrencySelector;
+    return moduleObj;
 };
 
 // start web sockets for this currency selector
-CurrencySelector.startWSockets = (): void => {
+moduleObj.startWSockets = (): void => {
     /*
     * WebSocket API
     *
@@ -78,22 +78,24 @@ CurrencySelector.startWSockets = (): void => {
     */
 
     // Ensure properties are defined before use (checked by TypeScript if strictNullChecks is on, but good practice)
-    if (!CurrencySelector.exchangeAPI || !CurrencySelector.key || !CurrencySelector.handleEvent || !CurrencySelector.sockets || !CurrencySelector.interval) {
+    if (!moduleObj.exchangeAPI || !moduleObj.key || !moduleObj.handleEvent || !moduleObj.sockets || !moduleObj.interval) {
         console.error("Module object not properly initialized before starting WebSockets.");
         return;
     }
 
-    CurrencySelector.sockets.depth = CurrencySelector.exchangeAPI.WS.onDepthUpdate(
-        CurrencySelector.key,
-        CurrencySelector.handleEvent);
+    moduleObj.sockets.depth = moduleObj.exchangeAPI.WS.onDepthUpdate(
+        moduleObj.key,
+        moduleObj.handleEvent);
 
-    CurrencySelector.sockets.trade = CurrencySelector.exchangeAPI.WS.onAggTrade(
-        CurrencySelector.key,
-        CurrencySelector.handleEvent);
+    moduleObj.sockets.trade = moduleObj.exchangeAPI.WS.onAggTrade(
+        moduleObj.key,
+        moduleObj.handleEvent);
 
-    CurrencySelector.sockets.kline = CurrencySelector.exchangeAPI.WS.onKline(
-        CurrencySelector.key,
-        CurrencySelector.interval,
-        CurrencySelector.handleEvent);
+    moduleObj.sockets.kline = moduleObj.exchangeAPI.WS.onKline(
+        moduleObj.key,
+        moduleObj.interval,
+        moduleObj.handleEvent);
 };
 
+
+export const CurrencySelector = moduleObj.init;
