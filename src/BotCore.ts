@@ -1,9 +1,9 @@
 // Required dependencies (assuming these files exist in the specified paths and are compatible)
-import {TradingCore} from './TradingCore'; // Assuming TradingCore is a class or constructor function
 import {DBHelpers} from './DBHelpers'; // Assuming DBHelpers is a class
 import {PairRanker} from './PairRanker'; // Assuming PairRanker is a class
 import {CurrencyCore} from './CurrencyCore';
 import {CtrlT} from "./types";
+import {TradingCore} from "./TradingCore";
 
 // The exported function
 export const BotCore = (ctrl: CtrlT): void => {
@@ -56,15 +56,9 @@ export const BotCore = (ctrl: CtrlT): void => {
 
     ctrl.logger.info('--- Starting Currency Streams');
 
-    // Initialize currencyCore using require, preserving original behavior
-    // Note: Using 'require' in TypeScript is possible but often less preferred than 'import'.
-    // This assumes './CurrencyCore' exports a function that accepts 'ctrl'.
-    // The type of the required module is inferred as 'any' due to 'require'.
-    // Explicit typing would be better if the structure of CurrencyCore module is known.
 
     const currencyCore = new CurrencyCore(ctrl);
     ctrl.currencyCore = currencyCore
 
-    // Initialize tradingCore after currencyCore is initialized
     const tradingCore = new TradingCore(ctrl.options.trading, currencyCore);
 };

@@ -179,9 +179,6 @@ export interface ICurrencyCore {
 }
 
 
-// Type Definitions (already provided in TypeScript format)
-export type TradingCoreOptions = {} // Assuming this might be more detailed elsewhere
-
 export type Ticker = {
     a: { key: string; stepFrom?: string };
     b: { stepFrom?: string };
@@ -219,7 +216,13 @@ type Storage = {
     streams: string[]
     pairRanks: Pair[]
     streamTick?: (stream: any, streamID: string) => any
-
+    rate: number;
+    a_step_from: string; // Assuming these are strings based on key generation
+    b_step_from: string;
+    c_step_from: string;
+    rates?: number[]; // Added when stored in queue
+    hits?: number;    // Added when stored in queue
+    // Add other potential properties if known
 }
 export type CtrlT = {
 
@@ -234,9 +237,13 @@ export type CtrlT = {
 export interface Candidate {
     a_step_from: string;
     a_step_to: string;
+    b_step_from: string
     b_step_to: string;
+    c_step_from: string;
     c_step_to: string;
     rate: number; // Assuming rate is consistently a number
+    rates: number[]
+    hits: number
 }
 
 export interface Pair {
@@ -270,4 +277,29 @@ export type IModuleObj = {
     UI?: any;     // UI is assigned in init, so it might be undefined initially
     init: (ctrl: CtrlT) => IModuleObj;
     wsEvent: (event: IWsEvent) => void;
+}
+
+export interface TradingCoreOptions {
+    minQueuePercentageThreshold?: number;
+    minHitsThreshold?: number;
+    // Add other potential options if known
+}
+
+
+// Interface for the return value of getArbitageRate
+export interface ArbitrageRateResult {
+    rate: number;
+    // Add other potential properties if known
+}
+
+// Interface for the CurrencyCore dependency
+export interface CurrencyCore {
+    getArbitageRate(stream: any, fromA: string, fromB: string, fromC: string): ArbitrageRateResult | null | undefined;
+
+    // Add other methods/properties if known
+}
+
+// Interface for the structure used as the queue (object keyed by string)
+export interface CandidateQueueObject {
+    [key: string]: Candidate;
 }

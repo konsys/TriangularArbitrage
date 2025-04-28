@@ -1,42 +1,9 @@
 import {EventEmitter} from 'events';
+import {Candidate, CandidateQueueObject, CurrencyCore, TradingCoreOptions} from "./types";
 
 // Define interfaces for complex types to improve type safety
 
 // Interface for the options object passed to the constructor
-interface TradingCoreOptions {
-    minQueuePercentageThreshold?: number;
-    minHitsThreshold?: number;
-    // Add other potential options if known
-}
-
-// Interface for the candidate objects
-interface Candidate {
-    rate: number;
-    a_step_from: string; // Assuming these are strings based on key generation
-    b_step_from: string;
-    c_step_from: string;
-    rates?: number[]; // Added when stored in queue
-    hits?: number;    // Added when stored in queue
-    // Add other potential properties if known
-}
-
-// Interface for the return value of getArbitageRate
-interface ArbitrageRateResult {
-    rate: number;
-    // Add other potential properties if known
-}
-
-// Interface for the CurrencyCore dependency
-interface CurrencyCore {
-    getArbitageRate(stream: any, fromA: string, fromB: string, fromC: string): ArbitrageRateResult | null | undefined;
-
-    // Add other methods/properties if known
-}
-
-// Interface for the structure used as the queue (object keyed by string)
-interface CandidateQueueObject {
-    [key: string]: Candidate;
-}
 
 export class TradingCore extends EventEmitter {
     public candidateQueue: Candidate[] = []; // Initialize as an empty array

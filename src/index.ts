@@ -28,13 +28,7 @@ async function start() {
         recvWindow: parseInt(process.env.restRecvWindow as string),
         disableBeautification: beautifyResponse
     });
-
-
     exchangeAPI.WS = new ws(beautifyResponse);
-    // }
-
-    await new Promise(r => setTimeout(r, 2000));
-
 
     const botOptions: BotOptions = {
         UI: {
@@ -70,7 +64,7 @@ async function start() {
     };
 
     ctrl.UI = new UI(ctrl.options)
-    
+
     BotCore(ctrl);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
