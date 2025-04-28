@@ -32,7 +32,6 @@ export const BotCore = (ctrl: CtrlT): void => {
             // Check if tradingCore is initialized before using it
             // This check is important because tradingCore is initialized after this function definition.
             if (tradingCore) {
-                // @ts-ignore
                 tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
             }
 
@@ -40,7 +39,7 @@ export const BotCore = (ctrl: CtrlT): void => {
             ctrl.UI.updateArbitageOpportunities(ctrl.storage.candidates);
 
             if (ctrl.options.storage.logHistory) {
-                // @ts-ignore
+
                 dbHelpers.saveArbRows(ctrl.storage.candidates, ctrl.storage.db, ctrl.logger);
                 // Assuming stream.arr exists and is the correct data structure for saveRawTick
                 if (stream && Array.isArray(stream.arr)) {

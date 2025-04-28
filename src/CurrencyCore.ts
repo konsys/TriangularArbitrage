@@ -9,12 +9,13 @@ export class CurrencyCore {
     streams: any = {}
     steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
     events: any = {
-        onAllTickerStream: ()=>{}
+        onAllTickerStream: () => {
+        }
     };
-    selectors:any[] =[];
+    selectors: any[] = [];
     controller: any = {};
 
-    constructor(ctrl){
+    constructor(ctrl) {
         if (!ctrl.exchange) {
             throw 'Undefined currency exchange connector. Will not be able to communicate with exchange API.';
         }
@@ -45,7 +46,7 @@ export class CurrencyCore {
 
             // something's wrong here. The BNB tree doesn't have BTC, although the BTC tree does.
 
-            if (this.controller && this.controller.storage.streamTick){
+            if (this.controller && this.controller.storage.streamTick) {
                 this.controller.storage.streamTick(this.streams[key], key);
             }
 
@@ -248,87 +249,8 @@ export class CurrencyCore {
 
         return matches;
     };
-
-
-    getBTCETHCandidatesFromStream (stream)  {
-        const keys = {
-            a: 'btc'.toUpperCase(),
-            b: 'eth'.toUpperCase(),
-            c: 'findme'.toUpperCase(),
-        };
-
-        const apairs = stream.markets.BTC;
-        const bpairs = stream.markets.ETH;
-
-        const akeys: any[] = [];
-        apairs.map((obj, i, array) => {
-            akeys[obj.s.replace(keys.a, '')] = obj;
-        });
-
-        // prevent 1-steps
-        delete akeys[keys.b];
-
-        /*
-          Loop through BPairs
-            for each bpair key, check if apair has it too.
-            If it does, run arbitrage math
-        */
-        const bmatches: any[] = [];
-        for (let i = 0; i < bpairs.length; i++) {
-            const bPairTicker = bpairs[i];
-            bPairTicker.key = bPairTicker.s.replace(keys.b, '');
-
-            // from B to C
-            bPairTicker.startsWithKey = bPairTicker.s.startsWith(keys.b);
-
-            // from C to B
-            bPairTicker.endsWithKey = bPairTicker.s.endsWith(keys.b);
-
-            if (akeys[bPairTicker.key]) {
-                const match = bPairTicker;
-
-                keys.c = match.key;
-
-                const rate = this.getArbitageRate(stream, keys.a, keys.b, keys.c);
-                const triangle: any = {
-                    a: keys.a,
-                    b: keys.b,
-                    c: keys.c,
-                    rate: rate
-                };
-                // debugger;
-                bmatches.push(triangle);
-            }
-        }
-
-        if (bmatches.length) {
-            bmatches.sort(function (a, b) {
-                return parseFloat(b.rate) - parseFloat(a.rate);
-            });
-        }
-        return bmatches;
-    };
-    simpleArbitrageMath = (stream, candidates) => {
-        if (!stream || !candidates) return;
-        //EURUSD * (1/GBPUSD) * (1/EURGBP) = 1
-
-        //start btc
-        //via xUSDT
-        //end btc
-
-        const a = candidates['BTCUSDT'];
-        const b = candidates['ETHUSDT'];
-        const c = candidates['ETHBTC'];
-
-        if (!a || isNaN(a) || !b || isNaN(b) || !c || isNaN(c)) return;
-
-        //btcusd : (flip/usdEth) : ethbtc
-        const d = (a.b) * (1 / b.b) * (c.b);
-        //debugger;
-        return d;
-    };
-
-    startAllTickerStream  (exchange) {
+    
+    startAllTickerStream(exchange) {
         if (!this.streams.allMarketTickers) {
             this.streams.allMarketTickers = {};
             this.streams.allMarketTickers.arr = [],
@@ -339,7 +261,7 @@ export class CurrencyCore {
         this.sockets.allMarketTickerStream = exchange.WS.onAllTickers(event => this.events.onAllTickerStream(event));
     };
 
-    startWSockets (exchange, ctrl) {
+    startWSockets(exchange, ctrl) {
 
         // loop through provided csv selectors, and initiate trades & orderBook sockets for each
         for (let i = 0; i < this.selectors.length; i++) {
@@ -351,5 +273,5 @@ export class CurrencyCore {
             this.currencies[selector.key as string].startWSockets(ctrl.events);
         }
     };
-};
+}
 

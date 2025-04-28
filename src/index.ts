@@ -57,7 +57,11 @@ async function start() {
             },
             candidates: [],
             streams: [],
-            pairRanks: []
+            pairRanks: [],
+            rate: 0,
+            a_step_from: '',
+            b_step_from: '',
+            c_step_from: ''
         },
         logger: logger,
         exchange: exchangeAPI,

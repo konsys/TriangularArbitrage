@@ -1,5 +1,6 @@
 import {EventEmitter} from 'events';
-import {Candidate, CandidateQueueObject, CurrencyCore, TradingCoreOptions} from "./types";
+import {ArbitrageRateResult, Candidate, CandidateQueueObject, TradingCoreOptions} from "./types";
+import {CurrencyCore} from "./CurrencyCore";
 
 // Define interfaces for complex types to improve type safety
 
@@ -27,14 +28,6 @@ export class TradingCore extends EventEmitter {
         // EventEmitter.call(this); // Replaced by super()
     }
 
-    public initiateTrade(pathInfo: any): void { // Added 'void' return type, 'any' for pathInfo as its structure isn't defined
-        // const self = this; // 'this' is automatically scoped in TypeScript class methods
-
-        /*
-         -
-
-        */
-    }
 
     // Note: The original JS used 'queue' ambiguously, sometimes as an object, sometimes sorted like an array.
     // This TS version assumes 'queue' is an object for accumulation and then converted to an array.
@@ -125,10 +118,6 @@ export class TradingCore extends EventEmitter {
     }
 
     public time(): number {
-        // const self = this; // 'this' is automatically scoped in TypeScript class methods
-        // Ensure _started is defined before subtraction, although constructor guarantees it.
-        // Return 0 or throw error if _started is somehow not set? Current JS returns NaN or TypeError.
-        // Sticking to original behavior which might result in NaN if called before constructor finishes (unlikely).
         return this._started && Date.now() - this._started;
     }
 }
