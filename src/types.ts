@@ -76,7 +76,7 @@ export interface TradingCoreOptions {
 }
 
 
-// Interface for the return value of getArbitageRate
+// Interface for the return value of getArbitrageRate
 export interface ArbitrageRateResult {
     rate: number;
     // Add other potential properties if known

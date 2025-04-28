@@ -7,8 +7,6 @@ import {TradingCore} from "./TradingCore";
 
 // The exported function
 export const BotCore = (ctrl: CtrlT): void => {
-
-
     const dbHelpers = new DBHelpers();
     const pairRanker = new PairRanker();
 

@@ -105,7 +105,7 @@ export class CurrencyCore {
 
         return currency;
     };
-    getArbitageRate = (stream, step1, step2, step3) => {
+    getArbitrageRate = (stream, step1, step2, step3) => {
         if (!stream || !step1 || !step2 || !step3) return;
         const ret: any = {
             a: this.getCurrencyFromStream(stream, step1, step2),
@@ -164,7 +164,7 @@ export class CurrencyCore {
                 if (stepC) {
                     keys.c = match.key;
 
-                    const comparison: any = this.getArbitageRate(stream, keys.a, keys.b, keys.c);
+                    const comparison: any = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
 
 
                     if (comparison) {
@@ -249,7 +249,7 @@ export class CurrencyCore {
 
         return matches;
     };
-    
+
     startAllTickerStream(exchange) {
         if (!this.streams.allMarketTickers) {
             this.streams.allMarketTickers = {};
@@ -266,7 +266,7 @@ export class CurrencyCore {
         // loop through provided csv selectors, and initiate trades & orderBook sockets for each
         for (let i = 0; i < this.selectors.length; i++) {
 
-            let selector = CurrencySelector(this.selectors[i], exchange);
+            let selector = new CurrencySelector(this.selectors[i], exchange);
 
             this.currencies[selector.key as string] = selector;
             this.currencies[selector.key as string].handleEvent = ctrl.events.wsEvent;
