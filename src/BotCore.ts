@@ -3,12 +3,12 @@ import {TradingCore} from './TradingCore'; // Assuming TradingCore is a class or
 import {DBHelpers} from './DBHelpers'; // Assuming DBHelpers is a class
 import {PairRanker} from './PairRanker'; // Assuming PairRanker is a class
 import {CurrencyCore} from './CurrencyCore';
-import {Ctrl} from "./types";
+import {CtrlT} from "./types";
 
 // The exported function
-export const BotCore = (ctrl: Ctrl): void => {
+export const BotCore = (ctrl: CtrlT): void => {
 
-    console.log(22222, ctrl.storage.streamTick )
+
     const dbHelpers = new DBHelpers();
     const pairRanker = new PairRanker();
 
@@ -22,7 +22,7 @@ export const BotCore = (ctrl: Ctrl): void => {
                 return; // Or handle appropriately
             }
 
-            ctrl.storage.candidates = ctrl.currencyCore.getDynamicCandidatesFromStream(stream, ctrl.options.arbitrage);
+            ctrl.storage.candidates = currencyCore.getDynamicCandidatesFromStream(stream, ctrl.options.arbitrage);
 
             const pairToTrade = pairRanker.getPairRanking(ctrl.storage.candidates, ctrl.storage.pairRanks, ctrl);
             if (pairToTrade !== 'none') {
@@ -35,6 +35,7 @@ export const BotCore = (ctrl: Ctrl): void => {
                 // @ts-ignore
                 tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
             }
+
 
             ctrl.UI.updateArbitageOpportunities(ctrl.storage.candidates);
 
@@ -61,11 +62,9 @@ export const BotCore = (ctrl: Ctrl): void => {
     // The type of the required module is inferred as 'any' due to 'require'.
     // Explicit typing would be better if the structure of CurrencyCore module is known.
 
-
-
-
-    ctrl.currencyCore = new CurrencyCore(ctrl);
+    const currencyCore = new CurrencyCore(ctrl);
+    ctrl.currencyCore = currencyCore
 
     // Initialize tradingCore after currencyCore is initialized
-    const tradingCore = new TradingCore(ctrl.options.trading, ctrl.currencyCore);
+    const tradingCore = new TradingCore(ctrl.options.trading, currencyCore);
 };

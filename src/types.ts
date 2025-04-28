@@ -1,36 +1,9 @@
-export interface BotOptions {
-    UI: {
-        title: string;
-    };
-    arbitrage: {
-        paths: string[];
-        start: string;    };
-    storage: {
-        logHistory: boolean;
-    };
-    trading: {
-        paperOnly: boolean;
-        minQueuePercentageThreshold: number;
-        minHitsThreshold: number;
-    };
-}
-
-export interface Storage {
-    trading: {
-        queue: any[];
-        active: any[];
-    };
-    candidates: any[];
-    streams: any[];
-    pairRanks: any[];
-}
-
+import {Logger} from "winston";
+import {CurrencyCore} from "./CurrencyCore";
 
 
 // --- Type Definitions ---
-
 // Represents a single ticker object from the Binance stream
-import {CurrencySelector} from "./CurrencySelector";
 
 export interface ITicker {
     s: string; // Symbol (e.g., "ETHBTC")
@@ -206,33 +179,95 @@ export interface ICurrencyCore {
 }
 
 
-
 // Type Definitions (already provided in TypeScript format)
 export type TradingCoreOptions = {} // Assuming this might be more detailed elsewhere
 
-export  interface Ctrl {
-    storage: {
-        streamTick: (stream: any, streamID: string) => void;
-        streams: Record<string, any>;
-        candidates: any[];
-        pairRanks: any[];
-        trading: {
-            queue: any[];
-        };
-        db: any; // Assuming 'db' has a specific type, using 'any' for now
+export type Ticker = {
+    a: { key: string; stepFrom?: string };
+    b: { stepFrom?: string };
+    c: { stepFrom?: string };
+    E: any;
+    s: any;
+    B: any;
+    A: any;
+    n: any;
+    rate: number;
+}
+
+export type UIOptions =
+    {
+        title: string;
     };
-    options: {
-        trading: TradingCoreOptions;
-        arbitrage: boolean;
-        storage: {
-            logHistory: boolean;
-        };
-    };
-    UI: {
-        updateArbitageOpportunities: (candidates: any[]) => void;
-    };
-    logger: {
-        info: (message: string) => void;
-    };
-    currencyCore?: any; // Assuming the type for CurrencyCore is defined elsewhere, using 'any' for now
+
+export type Currency = 'BTC' | 'USDT' | 'BNB' | 'ETH';
+
+type Trading = {
+    paperOnly: boolean
+    minQueuePercentageThreshold: number
+    minHitsThreshold: number
+}
+
+export type BotOptions = {
+    UI: UIOptions,
+    arbitrage: { paths?: string[], start?: Currency },
+    storage: { logHistory: boolean },
+    trading: Trading
+}
+type Storage = {
+    trading: { queue: string[]; active: string[] }
+    candidates: Candidate[]
+    streams: string[]
+    pairRanks: Pair[]
+    streamTick?: (stream: any, streamID: string) => any
+
+}
+export type CtrlT = {
+
+    options: BotOptions,
+    storage: Storage,
+    logger: Logger,
+    exchange: object
+    currencyCore?: CurrencyCore
+    UI?: any
+}
+
+export interface Candidate {
+    a_step_from: string;
+    a_step_to: string;
+    b_step_to: string;
+    c_step_to: string;
+    rate: number; // Assuming rate is consistently a number
+}
+
+export interface Pair {
+    id: string;
+    step_a: string;
+    step_b: string;
+    step_c: string;
+    step_d: string;
+    rate: number;
+    date: Date;
+}
+
+// Interface for the event object passed to wsEvent
+export interface IWsEvent {
+    eventType?: string; // eventType might be optional or present
+    // Define other potential event properties based on usage
+    // Example based on commented out code:
+    eventTime?: any;
+    symbol?: any;
+    tradeId?: any;
+    price?: any;
+    quantity?: any;
+
+    // Add other potential event properties if known
+    [key: string]: any; // Allow other properties if event structure is not fully known
+}
+
+// Interface for the moduleObj structure
+export type IModuleObj = {
+    ctrl?: CtrlT; // ctrl is assigned in init, so it might be undefined initially
+    UI?: any;     // UI is assigned in init, so it might be undefined initially
+    init: (ctrl: CtrlT) => IModuleObj;
+    wsEvent: (event: IWsEvent) => void;
 }

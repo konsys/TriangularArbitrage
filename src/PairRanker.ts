@@ -7,23 +7,8 @@
 
 // Define interfaces for better type safety
 
-interface Candidate {
-    a_step_from: string;
-    a_step_to: string;
-    b_step_to: string;
-    c_step_to: string;
-    rate: number; // Assuming rate is consistently a number
-}
 
-interface Pair {
-    id: string;
-    step_a: string;
-    step_b: string;
-    step_c: string;
-    step_d: string;
-    rate: number;
-    date: Date;
-}
+import {Candidate, Pair} from "./types";
 
 interface Controller {
     storage: {

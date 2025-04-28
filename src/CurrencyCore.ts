@@ -119,7 +119,7 @@ export class CurrencyCore {
     };
 
     getCandidatesFromStreamViaPath = (stream, aPair, bPair) => {
- 
+
         const keys = {
             a: aPair.toUpperCase(),
             b: bPair.toUpperCase(),

@@ -1,29 +1,36 @@
 import {logger} from './LoggerCore';
-import UI from './UI';
-import {EventsCore} from './EventsCore';
-import {BotCore} from './BotCore';
+
 import rest from 'binance/lib/rest';
 import ws from 'binance/lib/ws';
-import {BotOptions, Ctrl} from "./types";
+import {BotOptions, CtrlT, Currency} from "./types";
+import env from 'node-env-file';
+import {UI} from "./UI";
+import {BotCore} from "./BotCore";
 
+try {
+    env(__dirname + '/.keys');
+} catch (e) {
+    console.warn('No .keys was provided, running with defaults.');
+}
+env(__dirname + '/conf.ini');
 
-async function start(){
+async function start() {
 
     logger.info('--- Loading Exchange API');
 
     // if (process.env.activeExchange === 'binance') {
-        logger.info('--- \tActive Exchange:' + process.env.activeExchange);
+    logger.info('--- \tActive Exchange:' + process.env.activeExchange);
 
 
-        const beautifyResponse: boolean = false;
-        let exchangeAPI = new rest({
-            timeout: parseInt(process.env.restTimeout as string),
-            recvWindow: parseInt(process.env.restRecvWindow as string),
-            disableBeautification: beautifyResponse
-        });
+    const beautifyResponse: boolean = false;
+    let exchangeAPI = new rest({
+        timeout: parseInt(process.env.restTimeout as string),
+        recvWindow: parseInt(process.env.restRecvWindow as string),
+        disableBeautification: beautifyResponse
+    });
 
 
-        exchangeAPI.WS = new ws(beautifyResponse);
+    exchangeAPI.WS = new ws(beautifyResponse);
     // }
 
     await new Promise(r => setTimeout(r, 2000));
@@ -34,8 +41,8 @@ async function start(){
             title: 'Top Potential Arbitrage Triplets, via: ' + process.env.binanceColumns
         },
         arbitrage: {
-            paths: [''],
-            start: process.env.binanceStartingPoint as string
+            paths: process.env?.binanceColumns?.split(',') as string[],
+            start: process.env.binanceStartingPoint as Currency
         },
         storage: {
             logHistory: false
@@ -47,7 +54,7 @@ async function start(){
         }
     };
 
-    const ctrl: Ctrl = {
+    const ctrl: CtrlT = {
         options: botOptions,
         storage: {
             trading: {
@@ -59,16 +66,11 @@ async function start(){
             pairRanks: []
         },
         logger: logger,
-        exchange: exchangeAPI
+        exchange: exchangeAPI,
     };
-    // console.log(1111,   exchangeAPI)
 
-
-    UI(ctrl.options);
-// @ts-ignore
-    EventsCore(ctrl);
-
-// @ts-ignore
+    ctrl.UI = new UI(ctrl.options)
+    
     BotCore(ctrl);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
