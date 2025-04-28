@@ -1,8 +1,5 @@
-import CLI from 'clui';
-import clc from 'cli-color';
-
-const Line = CLI.Line,
-    LineBuffer = CLI.LineBuffer;
+import {Line, LineBuffer} from 'clui';
+import {cyan, green, red} from 'cli-color';
 
 export class UI {
     options: any
@@ -25,7 +22,7 @@ export class UI {
         });
 
         this.message = new Line(this.outputBuffer)
-            .column(this.options.UI.title, this.options.UI.title.length, [clc.green])
+            .column(this.options.UI.title, this.options.UI.title.length, [green])
             .fill()
             .store();
 
@@ -36,32 +33,32 @@ export class UI {
         this.cols = [10, 10, 20];
         /*
         this.header = new Line(this.outputBuffer)
-          .column('Time', this.cols[0], [clc.cyan])
-          .column('Symbol', this.cols[1], [clc.cyan])
+          .column('Time', this.cols[0], [cyan])
+          .column('Symbol', this.cols[1], [cyan])
 
-          .column('Bid Price', this.cols[2], [clc.cyan])
-          .column('Bid Volume', this.cols[3], [clc.cyan])
+          .column('Bid Price', this.cols[2], [cyan])
+          .column('Bid Volume', this.cols[3], [cyan])
 
-          .column('Ask Price', this.cols[2], [clc.cyan])
-          .column('Ask Volume', this.cols[3], [clc.cyan])
+          .column('Ask Price', this.cols[2], [cyan])
+          .column('Ask Volume', this.cols[3], [cyan])
 
-          .column('Trades', this.cols[1], [clc.cyan])
+          .column('Trades', this.cols[1], [cyan])
 
           .fill()
           .store();//*/
 
         this.header = new Line(this.outputBuffer)
-            .column('Step A', this.cols[0], [clc.cyan])
-            .column('Step B', this.cols[0], [clc.cyan])
-            .column('Step C', this.cols[0], [clc.cyan])
+            .column('Step A', this.cols[0], [cyan])
+            .column('Step B', this.cols[0], [cyan])
+            .column('Step C', this.cols[0], [cyan])
 
-            .column('Rate', this.cols[1], [clc.cyan])
+            .column('Rate', this.cols[1], [cyan])
 
-            .column('Fees BnB', this.cols[1], [clc.cyan])
-            .column('(Rate - BnB Fee)', 20, [clc.green])
+            .column('Fees BnB', this.cols[1], [cyan])
+            .column('(Rate - BnB Fee)', 20, [green])
 
-            .column('Fees Normal', 17, [clc.cyan])
-            .column('(Rate - Fee)', 20, [clc.green])
+            .column('Fees Normal', 17, [cyan])
+            .column('(Rate - Fee)', 20, [green])
 
             .fill()
             .store();
@@ -90,8 +87,8 @@ export class UI {
             if (!ticker) return;
             if (ticker.a) {
 
-                let color = clc.green;
-                if (ticker.rate && ticker.rate < 1) color = clc.red;
+                let color = green;
+                if (ticker.rate && ticker.rate < 1) color = red;
 
                 let rate = ((ticker.rate - 1) * 100);
                 let fees1 = rate * 0.05; //bnb
@@ -101,15 +98,15 @@ export class UI {
                 let fRate2 = rate - fees2;
 
                 this.line = new Line(this.outputBuffer)
-                    .column(ticker.a.key.toString(), this.cols[0], [clc.cyan])
-                    .column(ticker.b.stepFrom.toString(), this.cols[0], [clc.cyan])
-                    .column(ticker.c.stepFrom.toString(), this.cols[0], [clc.cyan])
+                    .column(ticker.a.key.toString(), this.cols[0], [cyan])
+                    .column(ticker.b.stepFrom.toString(), this.cols[0], [cyan])
+                    .column(ticker.c.stepFrom.toString(), this.cols[0], [cyan])
 
-                    .column(rate.toFixed(3).toString() + '%', this.cols[1], [clc.cyan])
-                    .column(fees1.toFixed(3).toString() + '%', this.cols[1], [clc.cyan])
+                    .column(rate.toFixed(3).toString() + '%', this.cols[1], [cyan])
+                    .column(fees1.toFixed(3).toString() + '%', this.cols[1], [cyan])
                     .column(fRate1.toFixed(3).toString() + '%', 20, [color])
 
-                    .column(fees2.toFixed(3).toString() + '%', 17, [clc.cyan])
+                    .column(fees2.toFixed(3).toString() + '%', 17, [cyan])
                     .column(fRate2.toFixed(3).toString() + '%', 20, [color])
 
                     .fill()
@@ -173,15 +170,4 @@ export class UI {
         this.updateUI(true);
     };
 
-    addTrade(time, symbol, tradeId, price, quantity) {
-        this.line = new Line(this.outputBuffer)
-            .column(time.toString(), this.cols[0])
-            .column(symbol.toString(), this.cols[1])
-            .column(price.toString(), this.cols[2])
-            .column(quantity.toString(), this.cols[3])
-            .fill()
-            .store();
-
-        this.updateUI(true);
-    };
 }
