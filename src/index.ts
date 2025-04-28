@@ -52,7 +52,7 @@ async function start() {
         options: botOptions,
         storage: {
             trading: {
-                queue: [],
+                queue: {},
                 active: []
             },
             candidates: [],
@@ -61,7 +61,7 @@ async function start() {
             rate: 0,
             a_step_from: '',
             b_step_from: '',
-            c_step_from: ''
+            c_step_from: '',
         },
         logger: logger,
         exchange: exchangeAPI,

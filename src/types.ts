@@ -34,7 +34,7 @@ type Storage = {
     c_step_from: string;
     rates?: number[];
     hits?: number;
-    db: Db
+    db?: Db
     // Add other potential properties if known
 }
 export type CtrlT = {
