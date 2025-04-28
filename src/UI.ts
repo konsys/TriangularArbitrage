@@ -1,25 +1,20 @@
-import CLI, {LineBuffer} from 'clui';
+import CLI from 'clui';
 import clc from 'cli-color';
-import {BotOptions, Ticker} from "./types";
 
-const Line: typeof CLI.Line = CLI.Line;
-
-
-interface Tickers {
-    [key: string]: Ticker;
-}
+const Line = CLI.Line,
+    LineBuffer = CLI.LineBuffer;
 
 export class UI {
-    options: BotOptions
+    options: any
     outputBuffer: any
     message: any
+    cols: number[]
     blankLine: any
-    cols: number[] = []
-    line: any;
-    maxRows: number = 0
+    header: any
+    maxRows: any
+    line: any
 
-    constructor(options: BotOptions) {
-        console.log(1111, options)
+    constructor(options) {
         this.options = options;
 
         this.outputBuffer = new LineBuffer({
@@ -38,9 +33,24 @@ export class UI {
             .fill()
             .store();
 
-        this.blankLine.cols = [10, 10, 20];
+        this.cols = [10, 10, 20];
+        /*
+        this.header = new Line(this.outputBuffer)
+          .column('Time', this.cols[0], [clc.cyan])
+          .column('Symbol', this.cols[1], [clc.cyan])
 
-        this.blankLine.header = new Line(this.outputBuffer)
+          .column('Bid Price', this.cols[2], [clc.cyan])
+          .column('Bid Volume', this.cols[3], [clc.cyan])
+
+          .column('Ask Price', this.cols[2], [clc.cyan])
+          .column('Ask Volume', this.cols[3], [clc.cyan])
+
+          .column('Trades', this.cols[1], [clc.cyan])
+
+          .fill()
+          .store();//*/
+
+        this.header = new Line(this.outputBuffer)
             .column('Step A', this.cols[0], [clc.cyan])
             .column('Step B', this.cols[0], [clc.cyan])
             .column('Step C', this.cols[0], [clc.cyan])
@@ -57,52 +67,43 @@ export class UI {
             .store();
 
         this.line;
-
-        const maxRowsStr: string | undefined = process.env.maxRows;
-
-        if (maxRowsStr) {
-            // Ensure that maxRows is a number
-            const maxRowsNum: number = parseInt(maxRowsStr);
-            if (!isNaN(maxRowsNum)) {
-                this.maxRows = maxRowsNum;
-            }
-        }
-
+        this.maxRows = process.env.maxRows;
         this.outputBuffer.output();
 
-    }
+    };
 
-    updateArbitageOpportunities(tickers: Ticker[]) {
+    updateUI(trimOld) {
+        if (trimOld && this.outputBuffer.lines.length > this.maxRows) this.outputBuffer.lines.splice(3, 1);
+        this.outputBuffer.output();
+    };
+
+    updateArbitageOpportunities = (tickers) => {
         if (!this.outputBuffer || !tickers) {
             return;
         }
 
         this.outputBuffer.lines.splice(3, this.outputBuffer.lines.length - 3);
+        //this.maxRows = keys.length + 2;
 
         for (let i = 0; i < this.maxRows; i++) {
-            const ticker: Ticker | undefined = tickers[i];
-            if (!ticker) {
-                return
-            }
-
-
+            let ticker = tickers[i];
+            if (!ticker) return;
             if (ticker.a) {
 
-                let color: typeof clc.green | typeof clc.red = clc.green;
-
+                let color = clc.green;
                 if (ticker.rate && ticker.rate < 1) color = clc.red;
 
-                const rate: number = ((ticker.rate - 1) * 100);
-                const fees1: number = rate * 0.05;
-                const fRate1: number = rate - fees1;
+                let rate = ((ticker.rate - 1) * 100);
+                let fees1 = rate * 0.05; //bnb
+                let fRate1 = rate - fees1;
 
-                const fees2: number = rate * 0.1;
-                const fRate2: number = rate - fees2;
+                let fees2 = rate * 0.1; //other
+                let fRate2 = rate - fees2;
 
                 this.line = new Line(this.outputBuffer)
                     .column(ticker.a.key.toString(), this.cols[0], [clc.cyan])
-                    .column(ticker.b?.stepFrom?.toString() || '', this.cols[0], [clc.cyan])
-                    .column(ticker.c?.stepFrom?.toString() || '', this.cols[0], [clc.cyan])
+                    .column(ticker.b.stepFrom.toString(), this.cols[0], [clc.cyan])
+                    .column(ticker.c.stepFrom.toString(), this.cols[0], [clc.cyan])
 
                     .column(rate.toFixed(3).toString() + '%', this.cols[1], [clc.cyan])
                     .column(fees1.toFixed(3).toString() + '%', this.cols[1], [clc.cyan])
@@ -121,61 +122,66 @@ export class UI {
         }
 
         this.outputBuffer.output();
-    }
+    };
 
-    updateTickers(tickers: Tickers) {
+    updateTickers(tickers) {
         if (!this.outputBuffer || !tickers) {
             return;
         }
 
-        const keys: string[] = Object.keys(tickers).sort();
-        if (this.outputBuffer.lines.length >= keys.length) {
-            // Adjust the splice count based on the current length of lines.
-            // This assumes you want to keep at least three lines above the updated lines.
-            const spliceCount: number = Math.max(keys.length - 3, 0);
-            console.log(spliceCount);
-            console.log(keys.length);
-            console.log(this.outputBuffer.lines.length);
-            console.log("splicing");
 
-            // Splicing old lines
-            // It will remove old entries and allow space for new ones
-            // If there are more than needed it will clear up the excess.
+        let keys = Object.keys(tickers).sort();
+        if (this.outputBuffer.lines.length >= keys.length) this.outputBuffer.lines.splice(3, keys.length);
 
-            // Remove entries starting from index `3` to maximum of `spliceCount`
-            // Only do this when we have sufficient elements in output buffer
-
-        }
+        //this.maxRows = keys.length + 2;
 
         for (let i = 0; i < keys.length; i++) {
-            const ticker: Ticker | undefined = tickers[keys[i]];
-
-            if (!ticker) {
-                return
-            }
+            let ticker = tickers[keys[i]];
+            if (!ticker) return;
 
 
-            // Create line entry for each ticker
-            let lineEntry = new Line(this.outputBuffer)
-            //. Add columns with respective data points
+            //*
+            this.line = new Line(this.outputBuffer)
+                .column(ticker.E.toString(), this.cols[0])
+                .column(ticker.s.toString(), this.cols[1])
+                // bid
+                .column(ticker.b.toString(), this.cols[2])
+                .column(ticker.B.toString(), this.cols[3])
 
-            lineEntry.column(ticker.E.toString(), this.cols[0]);
-            lineEntry.column(ticker.s.toString(), this.cols[1]);
+                // ask
+                .column(ticker.a.toString(), this.cols[2])
+                .column(ticker.A.toString(), this.cols[3])
 
-            lineEntry.column(ticker.b.toString(), this.cols[2]);
-            lineEntry.column(ticker.B.toString(), this.cols[3]);
-
-            lineEntry.column(ticker.a.toString(), this.cols[2]);
-            lineEntry.column(ticker.A.toString(), this.cols[3]);
-
-            lineEntry.column(ticker.n.toString(), this.cols[1]);
-
-            //. Fill and store created entry into output buffer
-            lineEntry.fill().store();
+                .column(ticker.n.toString(), this.cols[1])
+                .fill()
+                .store();//*/
 
         }
-    }
+        this.outputBuffer.output();
+    };
+
+
+    addTrade(time, symbol, tradeId, price, quantity) {
+        this.line = new Line(this.outputBuffer)
+            .column(time.toString(), this.cols[0])
+            .column(symbol.toString(), this.cols[1])
+            .column(price.toString(), this.cols[2])
+            .column(quantity.toString(), this.cols[3])
+            .fill()
+            .store();
+
+        this.updateUI(true);
+    };
+
+    addTrade(time, symbol, tradeId, price, quantity) {
+        this.line = new Line(this.outputBuffer)
+            .column(time.toString(), this.cols[0])
+            .column(symbol.toString(), this.cols[1])
+            .column(price.toString(), this.cols[2])
+            .column(quantity.toString(), this.cols[3])
+            .fill()
+            .store();
+
+        this.updateUI(true);
+    };
 }
-
-
-
