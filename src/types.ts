@@ -32,9 +32,10 @@ type Storage = {
     a_step_from: string; // Assuming these are strings based on key generation
     b_step_from: string;
     c_step_from: string;
+    db: Db;
     rates?: number[];
     hits?: number;
-    db?: Db
+
     // Add other potential properties if known
 }
 export type CtrlT = {
