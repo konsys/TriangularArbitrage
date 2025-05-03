@@ -2,6 +2,7 @@
 // Also assumes the existence of './CurrencySelector.js'
 
 import {CurrencySelector} from "./CurrencySelector";
+import {CtrlT} from "./types";
 
 export class CurrencyCore {
     currencies: any = {}
@@ -13,9 +14,9 @@ export class CurrencyCore {
         }
     };
     selectors: any[] = [];
-    controller: any = {};
+    controller: CtrlT;
 
-    constructor(ctrl) {
+    constructor(ctrl: CtrlT) {
         if (!ctrl.exchange) {
             throw 'Undefined currency exchange connector. Will not be able to communicate with exchange API.';
         }
@@ -101,7 +102,6 @@ export class CurrencyCore {
             type: 'MARKET',
             quantity: 1
         };
-        // console.log('getCurrencyFromStream: from/to: ', currency.stepFrom, currency.stepTo);
 
         return currency;
     };
@@ -238,7 +238,6 @@ export class CurrencyCore {
         for (let i = 0; i < options.paths.length; i++) {
             const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
             matches = matches.concat(pMatches);
-            // console.log("adding: " + pMatches.length + " to : " + matches.length);
         }
 
         if (matches.length) {

@@ -1,30 +1,9 @@
-// Required Dependencies:
-// Node.js environment with process.env defined
-// TypeScript compiler (tsc)
 
-// Type definitions for Node.js process environment (usually available via @types/node)
-// No explicit imports needed if @types/node is installed or if running in a standard Node.js environment.
+import {Candidate, CtrlT, Pair} from "./types";
 
-// Define interfaces for better type safety
+export class PairRanker {
 
-
-import {Candidate, Pair} from "./types";
-
-interface Controller {
-    storage: {
-        pairRanks: Pair[];
-    };
-}
-
-class PairRanker {
-    constructor() {
-    }
-
-    //Stores each Unique pair in an object and keeps track of the average rating
-    // Note: In the original JS, this was assigned to the prototype using an arrow function.
-
-    // Note: In the original JS, this was assigned directly to the PairRanker function (static).
-    static cleanPairingArray(pairRanks: Pair[]): Pair[] {
+    cleanPairingArray(pairRanks: Pair[]): Pair[] {
 
         const pairTimerEnv = process.env.pairTimer;
         const pairTimerMs = pairTimerEnv ? Number(pairTimerEnv) : NaN;
@@ -43,10 +22,8 @@ class PairRanker {
         return cleanArray;
     }
 
-    ///everything older then X time will be removed.
 
-    // Note: In the original JS, this was assigned directly to the PairRanker function (static).
-    static getTopPairs(pairToCheck: Candidate, pairRanks: Pair[]): boolean {
+    getTopPairs(pairToCheck: Candidate, pairRanks: Pair[]): boolean {
 
         let check: boolean = false;
         const id: string = pairToCheck['a_step_from'] + pairToCheck['a_step_to'] + pairToCheck['b_step_to'] + pairToCheck['c_step_to'];
@@ -78,14 +55,8 @@ class PairRanker {
         return check;
     }
 
-    ///checks the top candidate against the pair Array
+    getPairRanking(candidates: Candidate[], pairRanks: Pair[], ctrl: CtrlT): Candidate | 'none' {
 
-    // Translated as a standard instance method in the class.
-    getPairRanking(candidates: Candidate[], pairRanks: Pair[], ctrl: Controller): Candidate | 'none' {
-
-        // Create a mutable copy of pairRanks to work with locally if needed,
-        // but the original code modifies the passed array reference via ctrl.storage.pairRanks later.
-        // Let's stick to modifying the local variable `pairRanks` first, then assigning it back.
         let currentPairRanks = [...pairRanks]; // Use spread to avoid modifying the original array directly initially
 
         for (let i = 0; i < candidates.length; i++) {
@@ -104,9 +75,8 @@ class PairRanker {
             };
             currentPairRanks.push(pair);
         }
-        // The original code reassigns the local pairRanks variable.
-        // We assign the cleaned array back to our working copy.
-        currentPairRanks = PairRanker.cleanPairingArray(currentPairRanks);
+
+        currentPairRanks = this.cleanPairingArray(currentPairRanks);
 
         let check: boolean = false;
         let k: number = -1;
@@ -126,7 +96,7 @@ class PairRanker {
                 k++;
                 // Check if candidates[k] exists before passing it
                 if (candidates[k]) {
-                    check = PairRanker.getTopPairs(candidates[k], currentPairRanks);
+                    check = this.getTopPairs(candidates[k], currentPairRanks);
                     if (check) { // Assign returnValue only if check becomes true
                         returnValue = candidates[k];
                     }
@@ -148,5 +118,3 @@ class PairRanker {
     }
 }
 
-// Export the class using TypeScript syntax
-export {PairRanker};

@@ -6,7 +6,8 @@ import {CtrlT} from "./types";
 import {TradingCore} from "./TradingCore";
 
 // The exported function
-export const BotCore = (ctrl: CtrlT): void => {
+export const BotCore = (ctrl: CtrlT) => {
+
 
     const pairRanker = new PairRanker();
 
@@ -17,18 +18,13 @@ export const BotCore = (ctrl: CtrlT): void => {
         if (streamID === 'allMarketTickers') {
             if (!ctrl.currencyCore) {
                 ctrl.logger.info('Warning: currencyCore not initialized when streamTick received data.');
-                return; // Or handle appropriately
+                return;
             }
 
             ctrl.storage.candidates = currencyCore.getDynamicCandidatesFromStream(stream, ctrl.options.arbitrage);
 
             const pairToTrade = pairRanker.getPairRanking(ctrl.storage.candidates, ctrl.storage.pairRanks, ctrl);
-            if (pairToTrade !== 'none') {
-                // Original code had an empty block here, preserving it.
-            }
 
-            // Check if tradingCore is initialized before using it
-            // This check is important because tradingCore is initialized after this function definition.
             if (tradingCore) {
                 tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
             }
