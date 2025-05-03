@@ -4,7 +4,6 @@ import ws from 'binance/lib/ws';
 import {BotOptions, CtrlT, Currency} from "./types";
 
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
 import {UI} from "./UI";
 import {BotCore} from "./BotCore";
 
@@ -12,10 +11,6 @@ import {BotCore} from "./BotCore";
 
 dotenv.config({ path: '../.env' });
 
-console.log(process.env.MONGO_DB)
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url);
-const db = client.db('test');
 
 
 const start = async () => {
@@ -67,7 +62,6 @@ const start = async () => {
             a_step_from: '',
             b_step_from: '',
             c_step_from: '',
-            db,
         },
         logger: logger,
         exchange: exchangeAPI,

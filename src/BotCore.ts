@@ -1,5 +1,5 @@
 // Required dependencies (assuming these files exist in the specified paths and are compatible)
-import {DBHelpers} from './DBHelpers'; // Assuming DBHelpers is a class
+// Assuming DBHelpers is a class
 import {PairRanker} from './PairRanker'; // Assuming PairRanker is a class
 import {CurrencyCore} from './CurrencyCore';
 import {CtrlT} from "./types";
@@ -7,7 +7,7 @@ import {TradingCore} from "./TradingCore";
 
 // The exported function
 export const BotCore = (ctrl: CtrlT): void => {
-    const dbHelpers = new DBHelpers();
+
     const pairRanker = new PairRanker();
 
     // Define the streamTick function and assign it to ctrl.storage
@@ -36,18 +36,6 @@ export const BotCore = (ctrl: CtrlT): void => {
 
             ctrl.UI.updateArbitageOpportunities(ctrl.storage.candidates);
 
-            if (ctrl.options.storage.logHistory) {
-
-                dbHelpers.saveArbRows(ctrl.storage.candidates, ctrl.storage.db, ctrl.logger);
-                // Assuming stream.arr exists and is the correct data structure for saveRawTick
-                if (stream && Array.isArray(stream.arr)) {
-                    // @ts-ignore
-                    dbHelpers.saveRawTick(stream.arr, ctrl.storage.db, ctrl.logger);
-                } else {
-                    // Optional: Log a warning if stream.arr is not as expected
-                    // ctrl.logger.info('Warning: stream.arr not found or not an array in streamTick.');
-                }
-            }
         }
     };
 

@@ -1,6 +1,6 @@
 import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
-import {Db} from "mongodb";
+
 
 
 export type UIOptions =
@@ -32,7 +32,6 @@ type Storage = {
     a_step_from: string; // Assuming these are strings based on key generation
     b_step_from: string;
     c_step_from: string;
-    db: Db;
     rates?: number[];
     hits?: number;
 
