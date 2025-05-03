@@ -5,3 +5,5 @@ node_modules
 .data
 .idea
 build
+./.env
+/build

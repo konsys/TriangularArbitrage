@@ -1,12 +1,9 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   target: 'node',
-  // devtool: 'inline-source-map',
   mode: 'production',
-  // entry: {
-  //   main: './src/index.ts',
-  // },
 
   output: {
     path: path.join(__dirname, '/build'),
@@ -23,6 +20,7 @@ module.exports = {
         test: /\.ts?$/,
         exclude: /node_modules/,
       }
-    ]
+    ],
+
   },
 };

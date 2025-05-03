@@ -36,7 +36,6 @@ DBCore.startupDB = (logger: Logger, cb: StartupDbCallback): void => {
     //     if (process.env.mongoPass) authStr += ':' + encodeURIComponent(process.env.mongoPass);
     //     authStr += '@';
     //
-    //     // authMechanism could be a conf.ini parameter to support more mongodb authentication methods
     //     authMechanism = 'DEFAULT';
     // }
     //

@@ -1,20 +1,25 @@
 import {logger} from './LoggerCore';
-
 import rest from 'binance/lib/rest';
 import ws from 'binance/lib/ws';
 import {BotOptions, CtrlT, Currency} from "./types";
-import env from 'node-env-file';
+
+import dotenv from 'dotenv';
+import { MongoClient } from 'mongodb';
 import {UI} from "./UI";
 import {BotCore} from "./BotCore";
 
-try {
-    env(__dirname + '/.keys');
-} catch (e) {
-    console.warn('No .keys was provided, running with defaults.');
-}
-env(__dirname + '/conf.ini');
 
-async function start() {
+
+dotenv.config({ path: '../.env' });
+
+console.log(process.env.MONGO_DB)
+const url = 'mongodb://localhost:27017';
+const client = new MongoClient(url);
+const db = client.db('test');
+
+
+const start = async () => {
+
 
     logger.info('--- Loading Exchange API');
 
@@ -62,6 +67,7 @@ async function start() {
             a_step_from: '',
             b_step_from: '',
             c_step_from: '',
+            db,
         },
         logger: logger,
         exchange: exchangeAPI,
