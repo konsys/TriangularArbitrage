@@ -8,7 +8,7 @@ export class UI {
     cols: number[]
     blankLine: any
     header: any
-    maxRows: any
+    maxRows: number = 4
     line: any
 
     constructor(options) {
@@ -31,21 +31,7 @@ export class UI {
             .store();
 
         this.cols = [10, 10, 20];
-        /*
-        this.header = new Line(this.outputBuffer)
-          .column('Time', this.cols[0], [cyan])
-          .column('Symbol', this.cols[1], [cyan])
 
-          .column('Bid Price', this.cols[2], [cyan])
-          .column('Bid Volume', this.cols[3], [cyan])
-
-          .column('Ask Price', this.cols[2], [cyan])
-          .column('Ask Volume', this.cols[3], [cyan])
-
-          .column('Trades', this.cols[1], [cyan])
-
-          .fill()
-          .store();//*/
 
         this.header = new Line(this.outputBuffer)
             .column('Step A', this.cols[0], [cyan])
@@ -64,7 +50,6 @@ export class UI {
             .store();
 
         this.line;
-        this.maxRows = process.env.maxRows;
         this.outputBuffer.output();
 
     };
@@ -74,13 +59,15 @@ export class UI {
         this.outputBuffer.output();
     };
 
-    updateArbitageOpportunities = (tickers) => {
+    updateArbitrageOpportunities = (tickers) => {
+
+
         if (!this.outputBuffer || !tickers) {
             return;
         }
 
         this.outputBuffer.lines.splice(3, this.outputBuffer.lines.length - 3);
-        //this.maxRows = keys.length + 2;
+
 
         for (let i = 0; i < this.maxRows; i++) {
             let ticker = tickers[i];
@@ -128,9 +115,10 @@ export class UI {
 
 
         let keys = Object.keys(tickers).sort();
-        if (this.outputBuffer.lines.length >= keys.length) this.outputBuffer.lines.splice(3, keys.length);
+        if (this.outputBuffer.lines.length >= keys.length) {
+            this.outputBuffer.lines.splice(3, keys.length);
+        }
 
-        //this.maxRows = keys.length + 2;
 
         for (let i = 0; i < keys.length; i++) {
             let ticker = tickers[keys[i]];

@@ -16,7 +16,6 @@ if (!fs.existsSync(logDir)) {
 // prepare logging
 const {combine, timestamp, label, printf} = format;
 
-const tsFormat = (): string => (new Date()).toLocaleTimeString();
 const myFormat = printf((info: TransformableInfo): string => {
     // Note: Accessing info properties directly as they are expected from the format pipeline.
     // Winston's format pipeline (combine, timestamp, label) ensures these properties exist.

@@ -1,20 +1,65 @@
 // Required Dependencies: None explicitly mentioned, but assumes a WebSocket library is used by the 'exchange' object.
 // Also assumes the existence of './CurrencySelector.js'
 
-import {CurrencySelector} from "./CurrencySelector";
 import {CtrlT} from "./types";
 
+type Resp = {
+    e: string // '24hrTicker',
+    E: number // 1746382298495,
+    s: string // 'PYTHFDUSD',
+    p: string // '-0.00450000',
+    P: string // '-3.165',
+    w: string // '0.14089887',
+    x: string // '0.14210000',
+    c: string // '0.13770000',
+    Q: string // '1597.70000000',
+    b: string // '0.13710000',
+    B: string // '3750.70000000',
+    a: string // '0.13720000',
+    A: string // '5248.20000000',
+    o: string // '0.14220000',
+    h: string // '0.14500000',
+    l: string // '0.13690000',
+    v: string // '502061.80000000',
+    q: string // '70739.93821000',
+    O: number // 1746295898316,
+    C: number // 1746382298316,
+    F: number // 911668,
+    L: number // 912156,
+    n: number // 489
+
+}
+type SocketsT = {
+    allMarketTickerStream?: WebSocket
+}
+type StreamsT = {
+    allMarketTickers: {
+        arr: Resp[]
+        obj: Record<string, Resp>;
+        markets: any;
+    }
+}
+
+const streamsDefault: StreamsT = {
+    allMarketTickers: {
+        arr: [],
+        obj: {},
+        markets: {}
+    }
+}
+
 export class CurrencyCore {
-    currencies: any = {}
-    sockets: any = {}
-    streams: any = {}
+
+    sockets: SocketsT = {}
+    streams: StreamsT = streamsDefault
     steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
     events: any = {
         onAllTickerStream: () => {
         }
     };
-    selectors: any[] = [];
+
     controller: CtrlT;
+
 
     constructor(ctrl: CtrlT) {
         if (!ctrl.exchange) {
@@ -27,7 +72,8 @@ export class CurrencyCore {
         this.startAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
-        this.events.onAllTickerStream = stream => {
+        this.events.onAllTickerStream = (stream) => {
+
             const key = 'allMarketTickers';
 
             // Basic array from api arr[0].s = ETHBTC
@@ -50,14 +96,16 @@ export class CurrencyCore {
             if (this.controller && this.controller.storage.streamTick) {
                 this.controller.storage.streamTick(this.streams[key], key);
             }
-
         };
 
     }
 
 
     queueTicker = (interval) => {
-        if (!interval) interval = 3000;
+        if (!interval) {
+            interval = 3000;
+        }
+        console.log(111, this.streams.allMarketTickers.markets.length && this.streams.allMarketTickers.markets)
         setTimeout(() => {
             this.queueTicker(interval);
         }, interval);
@@ -69,7 +117,9 @@ export class CurrencyCore {
     };
 
     getCurrencyFromStream = (stream, fromCur, toCur) => {
-        if (!stream || !fromCur || !toCur) return;
+        if (!stream || !fromCur || !toCur) {
+            return;
+        }
 
         /*
          Binance uses xxxBTC notation. If we're looking at xxxBTC and we want to go from BTC to xxx, that means we're buying, vice versa for selling.
@@ -251,26 +301,12 @@ export class CurrencyCore {
 
     startAllTickerStream(exchange) {
         if (!this.streams.allMarketTickers) {
-            this.streams.allMarketTickers = {};
-            this.streams.allMarketTickers.arr = [],
-                this.streams.allMarketTickers.obj = {};
-            this.streams.allMarketTickers.markets = [];
+            this.streams = streamsDefault;
         }
 
         this.sockets.allMarketTickerStream = exchange.WS.onAllTickers(event => this.events.onAllTickerStream(event));
     };
 
-    startWSockets(exchange, ctrl) {
 
-        // loop through provided csv selectors, and initiate trades & orderBook sockets for each
-        for (let i = 0; i < this.selectors.length; i++) {
-
-            let selector = new CurrencySelector(this.selectors[i], exchange);
-
-            this.currencies[selector.key as string] = selector;
-            this.currencies[selector.key as string].handleEvent = ctrl.events.wsEvent;
-            this.currencies[selector.key as string].startWSockets(ctrl.events);
-        }
-    };
 }
 

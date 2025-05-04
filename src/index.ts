@@ -8,9 +8,7 @@ import {UI} from "./UI";
 import {BotCore} from "./BotCore";
 
 
-
-dotenv.config({ path: '../.env' });
-
+dotenv.config({path: '../.env'});
 
 
 const start = async () => {
@@ -18,7 +16,7 @@ const start = async () => {
 
     logger.info('--- Loading Exchange API');
 
-    // if (process.env.activeExchange === 'binance') {
+
     logger.info('--- \tActive Exchange:' + process.env.activeExchange);
 
 
@@ -69,7 +67,7 @@ const start = async () => {
 
     ctrl.UI = new UI(ctrl.options)
 
-    BotCore(ctrl);
+    new BotCore(ctrl);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
 

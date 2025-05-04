@@ -12,7 +12,6 @@ export class TradingCore extends EventEmitter {
     private _minQueuePercentageThreshold: number;
     private _minHitsThreshold: number;
     private _currencyCore: CurrencyCore;
-    private _activeTrades: { [key: string]: any }; // Using 'any' as the structure of active trades is not defined
 
     constructor(opts: TradingCoreOptions, currencyCore: CurrencyCore) {
         // The check `if (!(this instanceof TradingCore))` is implicit in TypeScript class constructors
@@ -23,8 +22,6 @@ export class TradingCore extends EventEmitter {
         this._minQueuePercentageThreshold = (opts.minQueuePercentageThreshold) ? (opts.minQueuePercentageThreshold / 100) + 1 : 0;
         this._minHitsThreshold = (opts.minHitsThreshold) ? opts.minHitsThreshold : 0;
         this._currencyCore = currencyCore;
-        this._activeTrades = {}; // Initialize active trades object
-
         // EventEmitter.call(this); // Replaced by super()
     }
 
@@ -44,8 +41,8 @@ export class TradingCore extends EventEmitter {
                 // store in queue using trio key. If new, initialise rates and hits. Else increment hits by 1.
                 if (!queue[key]) {
                     // Create a new object reference for the queue to avoid modifying the input candidate directly
-                    let queueCand: Candidate = {...cand, rates: [], hits: 1};
-                    queue[key] = queueCand;
+                    queue[key] = {...cand, rates: [], hits: 1};
+
                 } else {
                     // Ensure hits is initialized if somehow missing (shouldn't happen with above logic but good practice)
                     queue[key].hits = (queue[key].hits || 0) + 1;
@@ -103,11 +100,6 @@ export class TradingCore extends EventEmitter {
                 if (liveRate && liveRate.rate >= this._minQueuePercentageThreshold) {
                     this.emit('newTradeQueued', cand, this.time());
 
-                    // begin trading logic. Plan:
-                    /*
-
-
-                    */
                 }
             } else {
                 // Since the queue is sorted by hits descending, if this candidate doesn't meet the threshold,
