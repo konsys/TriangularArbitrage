@@ -1,45 +1,15 @@
 // Required Dependencies: None explicitly mentioned, but assumes a WebSocket library is used by the 'exchange' object.
 // Also assumes the existence of './CurrencySelector.js'
 
-import {CtrlT} from "./types";
+import {AllMarketTickersT, BinanceRespT, BinanceRestT, CtrlT, CurrencyT, StepT, StreamsT} from "./types";
 
-type Resp = {
-    e: string // '24hrTicker',
-    E: number // 1746382298495,
-    s: string // 'PYTHFDUSD',
-    p: string // '-0.00450000',
-    P: string // '-3.165',
-    w: string // '0.14089887',
-    x: string // '0.14210000',
-    c: string // '0.13770000',
-    Q: string // '1597.70000000',
-    b: string // '0.13710000',
-    B: string // '3750.70000000',
-    a: string // '0.13720000',
-    A: string // '5248.20000000',
-    o: string // '0.14220000',
-    h: string // '0.14500000',
-    l: string // '0.13690000',
-    v: string // '502061.80000000',
-    q: string // '70739.93821000',
-    O: number // 1746295898316,
-    C: number // 1746382298316,
-    F: number // 911668,
-    L: number // 912156,
-    n: number // 489
 
-}
 type SocketsT = {
     allMarketTickerStream?: WebSocket
 }
-type StreamsT = {
-    allMarketTickers: {
-        arr: Resp[]
-        obj: Record<string, Resp>;
-        markets: any;
-    }
-}
 
+
+type EventsT = { onAllTickerStream: (stream: BinanceRespT[]) => void }
 const streamsDefault: StreamsT = {
     allMarketTickers: {
         arr: [],
@@ -48,14 +18,14 @@ const streamsDefault: StreamsT = {
     }
 }
 
+
 export class CurrencyCore {
 
     sockets: SocketsT = {}
     streams: StreamsT = streamsDefault
     steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
-    events: any = {
-        onAllTickerStream: () => {
-        }
+    events: EventsT = {
+        onAllTickerStream: (stream: any) => undefined
     };
 
     controller: CtrlT;
@@ -101,11 +71,11 @@ export class CurrencyCore {
     }
 
 
-    queueTicker = (interval) => {
+    queueTicker = (interval: number) => {
         if (!interval) {
             interval = 3000;
         }
-        console.log(111, this.streams.allMarketTickers.markets.length && this.streams.allMarketTickers.markets)
+
         setTimeout(() => {
             this.queueTicker(interval);
         }, interval);
@@ -116,7 +86,7 @@ export class CurrencyCore {
         //debugger;
     };
 
-    getCurrencyFromStream = (stream, fromCur, toCur) => {
+    getCurrencyFromStream = (stream: AllMarketTickersT, fromCur, toCur) => {
         if (!stream || !fromCur || !toCur) {
             return;
         }
@@ -124,21 +94,23 @@ export class CurrencyCore {
         /*
          Binance uses xxxBTC notation. If we're looking at xxxBTC and we want to go from BTC to xxx, that means we're buying, vice versa for selling.
         */
-        let currency = stream.obj[toCur + fromCur];
+        let currency: CurrencyT = stream.obj[toCur + fromCur];
+
+
         if (currency) {
             // found a match using reversed binance syntax, meaning we're buying if we're going from->to (btc->xxx in xxxBTC ticker) using a fromCurtoCur ticker.
             currency.flipped = false;
-            currency.rate = currency.a;
+            currency.rate = +currency.a;
 
             // BNBBTC
             // ask == trying to buy
         } else {
             currency = stream.obj[fromCur + toCur];
             if (!currency) {
-                return false;
+                return;
             }
             currency.flipped = true;
-            currency.rate = (1 / currency.b);
+            currency.rate = (1 / +currency.b);
 
             // BTCBNB
             // bid == im trying to sell.
@@ -148,28 +120,37 @@ export class CurrencyCore {
 
         currency.tradeInfo = {
             symbol: currency.s,
-            side: (currency.flipped == true) ? 'SELL' : 'BUY',
+            side: currency.flipped ? 'SELL' : 'BUY',
             type: 'MARKET',
             quantity: 1
         };
 
         return currency;
     };
-    getArbitrageRate = (stream, step1, step2, step3) => {
-        if (!stream || !step1 || !step2 || !step3) return;
+
+    getArbitrageRate = (stream: AllMarketTickersT, step1: StepT[], step2: StepT[], step3: StepT[]) => {
+
+        if (!stream || !step1 || !step2 || !step3) {
+            return
+        }
+
         const ret: any = {
             a: this.getCurrencyFromStream(stream, step1, step2),
             b: this.getCurrencyFromStream(stream, step2, step3),
             c: this.getCurrencyFromStream(stream, step3, step1)
         };
 
-        if (!ret.a || !ret.b || !ret.c) return;
+        if (!ret.a || !ret.b || !ret.c) {
+            return;
+        }
 
         ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
+
+        console.log(1111, ret)
         return ret;
     };
 
-    getCandidatesFromStreamViaPath = (stream, aPair, bPair) => {
+    getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair, bPair) => {
 
         const keys = {
             a: aPair.toUpperCase(),
@@ -282,8 +263,10 @@ export class CurrencyCore {
 
         return bmatches;
     };
-    getDynamicCandidatesFromStream = (stream, options) => {
+
+    getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options) => {
         let matches: any[] = [];
+
 
         for (let i = 0; i < options.paths.length; i++) {
             const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
@@ -299,12 +282,18 @@ export class CurrencyCore {
         return matches;
     };
 
-    startAllTickerStream(exchange) {
+    startAllTickerStream(exchange: BinanceRestT) {
+
         if (!this.streams.allMarketTickers) {
             this.streams = streamsDefault;
         }
 
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers(event => this.events.onAllTickerStream(event));
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BinanceRespT[]) => {
+
+
+                return this.events.onAllTickerStream(event)
+            }
+        );
     };
 
 

@@ -2,7 +2,6 @@ import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
 
 
-
 export type UIOptions =
     {
         title: string;
@@ -41,7 +40,7 @@ export type CtrlT = {
     options: BotOptions,
     storage: Storage,
     logger: Logger,
-    exchange: object
+    exchange: BinanceRestT
     currencyCore?: CurrencyCore
     UI?: any
 }
@@ -98,3 +97,74 @@ export interface ExchangeWebSocketAPI {
 export interface ExchangeAPI {
     WS: ExchangeWebSocketAPI;
 }
+
+export type  BinanceRestT = {
+    key?: string
+    secret?: string
+    recvWindow: number // 10000
+    timeout: number //15000
+    disableBeautification: boolean
+    handleDrift: boolean
+    requestOptions: any
+    WS: {
+        onAllTickers: any
+        streams: {
+            depth: () => void;
+            depthLevel: () => void;
+            kline: () => void;
+            aggTrade: () => void;
+            trade: () => void;
+            ticker: () => void;
+            allTickers: () => void;
+        }
+    }
+}
+
+export type BinanceRespT = {
+    e: string // '24hrTicker',
+    E: number // 1746382298495,
+    s: string // 'PYTHFDUSD',
+    p: string // '-0.00450000',
+    P: string // '-3.165',
+    w: string // '0.14089887',
+    x: string // '0.14210000',
+    c: string // '0.13770000',
+    Q: string // '1597.70000000',
+    b: string // '0.13710000',
+    B: string // '3750.70000000',
+    a: string // '0.13720000',
+    A: string // '5248.20000000',
+    o: string // '0.14220000',
+    h: string // '0.14500000',
+    l: string // '0.13690000',
+    v: string // '502061.80000000',
+    q: string // '70739.93821000',
+    O: number // 1746295898316,
+    C: number // 1746382298316,
+    F: number // 911668,
+    L: number // 912156,
+    n: number // 489
+}
+
+export type CurrencyT = BinanceRespT & {
+    flipped?: boolean;
+    rate?: number;
+    stepFrom?: string
+    stepTo?: string
+    tradeInfo?: {
+        symbol: string
+        side: 'SELL' | 'BUY'
+        type: string
+        quantity: number
+    }
+}
+
+export type AllMarketTickersT = {
+    arr: BinanceRespT[]
+    obj: Record<string, BinanceRespT>;
+    markets: any;
+}
+export type StreamsT = {
+    allMarketTickers: AllMarketTickersT
+}
+export type StepT = '1' | '2' | '3'
