@@ -5,6 +5,7 @@ import {BotOptions, CtrlT, CurrencyNameT} from "./types";
 
 import dotenv from 'dotenv';
 import {BotCore} from "./BotCore";
+import {UI} from "./UI";
 
 
 dotenv.config({path: '../.env'});
@@ -64,9 +65,12 @@ const start = async () => {
         exchange: exchangeAPI,
     };
 
-    // ctrl.UI = new UI(ctrl.options)
+    const showUi = false
 
-    new BotCore(ctrl, false);
+    if (showUi) {
+        ctrl.UI = new UI(ctrl.options)
+    }
+    new BotCore(ctrl, showUi);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
 

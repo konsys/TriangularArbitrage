@@ -3,12 +3,13 @@
 
 import {
     AllMarketTickersT,
-    BinanceRespT,
     BinanceRestT,
+    ComparisonT,
     CtrlT,
     CurrencyDataT,
     CurrencyNameT,
     CurrencyT,
+    CurrencyValueT,
     PairT,
     StepCurrencyT,
     StreamsT
@@ -20,7 +21,7 @@ type SocketsT = {
 }
 
 
-type EventsT = { onAllTickerStream: (stream: BinanceRespT[]) => void }
+type EventsT = { onAllTickerStream: (stream: CurrencyValueT[]) => void }
 const streamsDefault: StreamsT = {
     allMarketTickers: {
         arr: [],
@@ -113,8 +114,6 @@ export class CurrencyCore {
             currency.flipped = false;
             currency.rate = +currency.a;
 
-            // BNBBTC
-            // ask == trying to buy
         } else {
             currency = stream.obj[fromCur + toCur];
             if (!currency) {
@@ -123,11 +122,10 @@ export class CurrencyCore {
             currency.flipped = true;
             currency.rate = (1 / +currency.b);
 
-            // BTCBNB
-            // bid == im trying to sell.
         }
         currency.stepFrom = fromCur;
         currency.stepTo = toCur;
+
 
         currency.tradeInfo = {
             symbol: currency.s,
@@ -139,10 +137,9 @@ export class CurrencyCore {
         return currency;
     };
 
-    getArbitrageRate = (stream: AllMarketTickersT, step1: any[], step2: any[], step3: any[]) => {
+    getArbitrageRate = (stream: AllMarketTickersT, step1: CurrencyNameT, step2: CurrencyNameT, step3: CurrencyNameT) => {
 
-        console.log(step1)
-        console.log()
+
         if (!stream || !step1 || !step2 || !step3) {
             return
         }
@@ -163,12 +160,12 @@ export class CurrencyCore {
     };
 
     getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair: CurrencyNameT, bPair: CurrencyNameT) => {
-   
+
 
         const keys: StepCurrencyT = {
             a: aPair,
             b: bPair,
-            c: "FINDME"
+            c: aPair
         };
 
         const apairs: PairT[] = stream.markets[keys.a];
@@ -193,7 +190,9 @@ export class CurrencyCore {
         for (let i = 0; i < bpairs.length; i++) {
             const bPairTicker = bpairs[i];
 
-            bPairTicker.key = bPairTicker.s.replace(keys.b, '');
+
+            bPairTicker.key = bPairTicker.s.replace(keys.b, '') as CurrencyNameT;
+
 
             // from B to C
             bPairTicker.startsWithKey = bPairTicker.s.startsWith(keys.b);
@@ -203,7 +202,7 @@ export class CurrencyCore {
 
             if (akeys[bPairTicker.key]) {
                 const match = bPairTicker;
-                // check price from bPairTicker.key to keys.a
+
 
                 const stepC = this.getCurrencyFromStream(stream, match.key, keys.a);
 
@@ -212,7 +211,7 @@ export class CurrencyCore {
                     keys.c = match.key;
 
 
-                    const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
+                    const comparison: ComparisonT = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
 
 
                     if (comparison) {
@@ -228,7 +227,7 @@ export class CurrencyCore {
                             a_symbol: comparison.a.s,
                             a_step_from: comparison.a.stepFrom,//btc
                             a_step_to: comparison.a.stepTo,//bnb
-                            a_step_type: comparison.a.tradeInfo.side,
+                            a_step_type: comparison.a.tradeInfo?.side,
                             a_bid_price: comparison.a.b,
                             a_bid_quantity: comparison.a.B,
                             a_ask_price: comparison.a.a,
@@ -236,11 +235,11 @@ export class CurrencyCore {
                             a_volume: comparison.a.v,
                             a_trades: comparison.a.n,
 
-                            b: comparison.b,//full ticker for second pair (BNB->XMR)
+                            b: comparison.b,
                             b_symbol: comparison.b.s,
-                            b_step_from: comparison.b.stepFrom,//bnb
-                            b_step_to: comparison.b.stepTo,//xmr
-                            b_step_type: comparison.b.tradeInfo.side,
+                            b_step_from: comparison.b.stepFrom,
+                            b_step_to: comparison.b.stepTo,
+                            b_step_type: comparison.b.tradeInfo?.side,
                             b_bid_price: comparison.b.b,
                             b_bid_quantity: comparison.b.B,
                             b_ask_price: comparison.b.a,
@@ -248,11 +247,11 @@ export class CurrencyCore {
                             b_volume: comparison.b.v,
                             b_trades: comparison.b.n,
 
-                            c: comparison.c,////full ticker for third pair (XMR->BTC)
+                            c: comparison.c,
                             c_symbol: comparison.c.s,
-                            c_step_from: comparison.c.stepFrom,//xmr
-                            c_step_to: comparison.c.stepTo,//btc
-                            c_step_type: comparison.c.tradeInfo.side,
+                            c_step_from: comparison.c.stepFrom,
+                            c_step_to: comparison.c.stepTo,
+                            c_step_type: comparison.c.tradeInfo?.side,
                             c_bid_price: comparison.c.b,
                             c_bid_quantity: comparison.c.B,
                             c_ask_price: comparison.c.a,
@@ -305,7 +304,7 @@ export class CurrencyCore {
             this.streams = streamsDefault;
         }
 
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BinanceRespT[]) => {
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: CurrencyValueT[]) => {
 
 
                 return this.events.onAllTickerStream(event)

@@ -17,6 +17,11 @@ export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' | 'AXL' | 'JPY' | 'DO
     'WAN' | 'SFP' | 'FDUSD' | 'ZEN' |
     'OM' | 'VET' | 'USDC' | 'RONIN'
 
+export type SideT = 'SELL' | 'BUY'
+
+type DoubleName = `${CurrencyNameT}${CurrencyNameT}`;
+type TripleName = `${CurrencyNameT}${CurrencyNameT}${CurrencyNameT}`;
+
 
 type Trading = {
     paperOnly: boolean
@@ -31,8 +36,8 @@ export type BotOptions = {
     trading: Trading
 }
 type Storage = {
-    trading: { queue: CandidateQueueObject; active: string[] }
-    candidates: Candidate[]
+    trading: { queue: CandidateQueueObject | {}; active: string[] }
+    candidates: CandidateT[]
     streams: string[]
     pairRanks: Pair[]
     streamTick?: (stream: any, streamID: string) => any
@@ -54,17 +59,6 @@ export type CtrlT = {
     UI?: any
 }
 
-export interface Candidate {
-    a_step_from: string;
-    a_step_to: string;
-    b_step_from: string
-    b_step_to: string;
-    c_step_from: string;
-    c_step_to: string;
-    rate: number; // Assuming rate is consistently a number
-    rates: number[]
-    hits: number
-}
 
 export interface Pair {
     id: string;
@@ -92,15 +86,60 @@ export interface ArbitrageRateResult {
 
 
 // Interface for the structure used as the queue (object keyed by string)
-export interface CandidateQueueObject {
-    [key: string]: Candidate;
+export type CandidateQueueObject = Record<DoubleName, CandidateT>
+
+interface Cand {
+    a_step_from: CurrencyNameT;
+    a_step_to: CurrencyNameT;
+    b_step_from: CurrencyNameT
+    b_step_to: CurrencyNameT;
+    c_step_from: CurrencyNameT;
+    c_step_to: CurrencyNameT;
+    rate: number
+    rates: number[]
+    hits: number
 }
+
+export type CandidateT = Cand & {
+    ws_ts: number
+    ts: number
+    dt: Date
+    a: CurrencyValueT
+    a_symbol: CurrencyNameT
+    a_step_type: SideT
+    a_bid_price: string // '93887.99000000'
+    a_bid_quantity: string // '5.25872000'
+    a_ask_price: string // 93888.00000000'
+    a_ask_quantity: string // '1.58963000'
+    a_volume: string // '14143.14544000'
+    a_trades: number
+    b: CurrencyValueT
+    b_symbol: DoubleName // 'RVNUSDT'
+    b_step_type: SideT
+    b_bid_price: string // '0.01028000'
+    b_bid_quantity: string // '74432.30000000'
+    b_ask_price: string //  '0.01029000'
+    b_ask_quantity: string // '76849.00000000'
+    b_volume: string // '123062925.30000000'
+    b_trades: number
+    c: CurrencyValueT
+    c_symbol: DoubleName // 'RVNBTC'
+    c_step_type: SideT
+    c_bid_price: string // '0.00000010'
+    c_bid_quantity: string // '5499885.00000000'
+    c_ask_price: string // '0.00000011'
+    c_ask_quantity: string // '1432512.00000000'
+    c_volume: string // '2978415.00000000'
+    c_trades: number
+
+}
+
 
 // Define the structure of the exchangeAPI object for type safety
 export interface ExchangeWebSocketAPI {
-    onDepthUpdate: (key: string, callback: (data: any) => void) => any;
-    onAggTrade: (key: string, callback: (data: any) => void) => any;
-    onKline: (key: string, interval: string, callback: (data: any) => void) => any;
+    onDepthUpdate: (key: CurrencyNameT, callback: (data: any) => void) => any;
+    onAggTrade: (key: CurrencyNameT, callback: (data: any) => void) => any;
+    onKline: (key: CurrencyNameT, interval: string, callback: (data: any) => void) => any;
 }
 
 export interface ExchangeAPI {
@@ -108,7 +147,7 @@ export interface ExchangeAPI {
 }
 
 export type  BinanceRestT = {
-    key?: string
+    key?: CurrencyNameT
     secret?: string
     recvWindow: number // 10000
     timeout: number //15000
@@ -129,10 +168,10 @@ export type  BinanceRestT = {
     }
 }
 
-export type BinanceRespT = {
+export type CurrencyValueT = {
     e: string // '24hrTicker',
     E: number // 1746382298495,
-    s: string // 'PYTHFDUSD',
+    s: DoubleName // 'PYTHFDUSD',
     p: string // '-0.00450000',
     P: string // '-3.165',
     w: string // '0.14089887',
@@ -155,39 +194,47 @@ export type BinanceRespT = {
     n: number // 489
 }
 
-export type CurrencyT = BinanceRespT & {
+
+export type CurrencyT = CurrencyValueT & {
     flipped?: boolean;
     rate?: number;
-    stepFrom?: string
-    stepTo?: string
+    stepFrom?: CurrencyNameT
+    stepTo?: CurrencyNameT
     tradeInfo?: {
-        symbol: string
-        side: 'SELL' | 'BUY'
+        symbol: DoubleName
+        side: SideT
         type: string
         quantity: number
     }
 }
 
 export type PairT = CurrencyT & {
-    key: string;
+    key: CurrencyNameT;
     startsWithKey: boolean;
     endsWithKey: boolean
 }
 
-export type CurrencyDataT = Record<CurrencyNameT, BinanceRespT>
 
 export type AllMarketTickersT = {
-    arr: BinanceRespT[]
+    arr: CurrencyValueT[]
     obj: CurrencyDataT | {};
     markets: any;
 }
 export type StreamsT = {
     allMarketTickers: AllMarketTickersT
 }
+
+export type CurrencyDataT = Record<CurrencyNameT, CurrencyValueT>
+
 export type StepA = 'a'
 export type StepB = 'b'
 export type StepC = 'c'
 
-export type StepCurrencyT = Record<StepA | StepB | StepC, CurrencyNameT | FindMeT>
+export type StepCurrencyT = Record<StepA | StepB | StepC, CurrencyNameT>
 
-export type FindMeT = 'FINDME'
+export type ComparisonT = {
+    a: CurrencyT
+    b: CurrencyT
+    c: CurrencyT
+    rate: number
+}
