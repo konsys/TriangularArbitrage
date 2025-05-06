@@ -4,9 +4,10 @@ import {TradingCore} from "./TradingCore";
 
 
 export class BotCore {
+    isUI = false
 
-    constructor(ctrl: CtrlT) {
-
+    constructor(ctrl: CtrlT, ui: boolean) {
+        this.isUI = ui
         const currencyCore = new CurrencyCore(ctrl);
         ctrl.currencyCore = currencyCore
 
@@ -27,7 +28,10 @@ export class BotCore {
                     tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
                 }
 
-                ctrl.UI.updateArbitrageOpportunities(ctrl.storage.candidates);
+                if (this.isUI) {
+                    ctrl.UI.updateArbitrageOpportunities(ctrl.storage.candidates);
+                }
+
 
             }
         };

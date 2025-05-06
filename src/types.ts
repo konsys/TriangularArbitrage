@@ -7,7 +7,16 @@ export type UIOptions =
         title: string;
     };
 
-export type Currency = 'BTC' | 'USDT' | 'BNB' | 'ETH';
+export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' | 'AXL' | 'JPY' | 'DOGE' | 'HBAR' |
+    'BCH' | 'TRY' | 'ZRO' | 'EUR' |
+    'SSV' | 'SLF' | 'STPT' | 'SOL' |
+    'PYR' | 'BICO' | 'LOKA' | 'NMR' |
+    'KAITO' | 'ETC' |
+    'AVAX' | 'ZEC' | 'OP' | 'PLN' |
+    'ADA' | 'SUI' | 'ARKM' | 'WLD' |
+    'WAN' | 'SFP' | 'FDUSD' | 'ZEN' |
+    'OM' | 'VET' | 'USDC' | 'RONIN'
+
 
 type Trading = {
     paperOnly: boolean
@@ -17,7 +26,7 @@ type Trading = {
 
 export type BotOptions = {
     UI: UIOptions,
-    arbitrage: { paths?: string[], start?: Currency },
+    arbitrage: { paths?: CurrencyNameT[], start?: CurrencyNameT },
     storage: { logHistory: boolean },
     trading: Trading
 }
@@ -159,12 +168,26 @@ export type CurrencyT = BinanceRespT & {
     }
 }
 
+export type PairT = CurrencyT & {
+    key: string;
+    startsWithKey: boolean;
+    endsWithKey: boolean
+}
+
+export type CurrencyDataT = Record<CurrencyNameT, BinanceRespT>
+
 export type AllMarketTickersT = {
     arr: BinanceRespT[]
-    obj: Record<string, BinanceRespT>;
+    obj: CurrencyDataT | {};
     markets: any;
 }
 export type StreamsT = {
     allMarketTickers: AllMarketTickersT
 }
-export type StepT = '1' | '2' | '3'
+export type StepA = 'a'
+export type StepB = 'b'
+export type StepC = 'c'
+
+export type StepCurrencyT = Record<StepA | StepB | StepC, CurrencyNameT | FindMeT>
+
+export type FindMeT = 'FINDME'

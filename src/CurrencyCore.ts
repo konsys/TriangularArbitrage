@@ -1,7 +1,18 @@
 // Required Dependencies: None explicitly mentioned, but assumes a WebSocket library is used by the 'exchange' object.
 // Also assumes the existence of './CurrencySelector.js'
 
-import {AllMarketTickersT, BinanceRespT, BinanceRestT, CtrlT, CurrencyT, StepT, StreamsT} from "./types";
+import {
+    AllMarketTickersT,
+    BinanceRespT,
+    BinanceRestT,
+    CtrlT,
+    CurrencyDataT,
+    CurrencyNameT,
+    CurrencyT,
+    PairT,
+    StepCurrencyT,
+    StreamsT
+} from "./types";
 
 
 type SocketsT = {
@@ -50,9 +61,9 @@ export class CurrencyCore {
             this.streams.allMarketTickers.arr = stream;
 
             // Mapped object arr[ETHBTC]
-            this.streams.allMarketTickers.obj = stream.reduce(function (array, current) {
-                array[current.s] = current;
-                return array;
+            this.streams.allMarketTickers.obj = stream.reduce((acc, current) => {
+                acc[current.s] = current;
+                return acc;
             }, {});
 
             // Sub objects with only data on specific markets
@@ -128,8 +139,10 @@ export class CurrencyCore {
         return currency;
     };
 
-    getArbitrageRate = (stream: AllMarketTickersT, step1: StepT[], step2: StepT[], step3: StepT[]) => {
+    getArbitrageRate = (stream: AllMarketTickersT, step1: any[], step2: any[], step3: any[]) => {
 
+        console.log(step1)
+        console.log()
         if (!stream || !step1 || !step2 || !step3) {
             return
         }
@@ -146,25 +159,27 @@ export class CurrencyCore {
 
         ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
 
-        console.log(1111, ret)
         return ret;
     };
 
-    getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair, bPair) => {
+    getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair: CurrencyNameT, bPair: CurrencyNameT) => {
+   
 
-        const keys = {
-            a: aPair.toUpperCase(),
-            b: bPair.toUpperCase(),
-            c: 'findme'.toUpperCase(),
+        const keys: StepCurrencyT = {
+            a: aPair,
+            b: bPair,
+            c: "FINDME"
         };
 
-        const apairs = stream.markets[keys.a];
-        const bpairs = stream.markets[keys.b];
+        const apairs: PairT[] = stream.markets[keys.a];
+        const bpairs: PairT[] = stream.markets[keys.b];
 
-        const akeys: any[] = [];
+
+        const akeys: CurrencyDataT[] = [];
         apairs.map((obj, i, array) => {
             akeys[obj.s.replace(keys.a, '')] = obj;
         });
+
 
         // prevent 1-steps
         delete akeys[keys.b];
@@ -177,6 +192,7 @@ export class CurrencyCore {
         const bmatches: any[] = [];
         for (let i = 0; i < bpairs.length; i++) {
             const bPairTicker = bpairs[i];
+
             bPairTicker.key = bPairTicker.s.replace(keys.b, '');
 
             // from B to C
@@ -195,7 +211,8 @@ export class CurrencyCore {
                 if (stepC) {
                     keys.c = match.key;
 
-                    const comparison: any = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
+
+                    const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
 
 
                     if (comparison) {

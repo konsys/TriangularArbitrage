@@ -1,10 +1,9 @@
 import {logger} from './LoggerCore';
 import rest from 'binance/lib/rest';
 import ws from 'binance/lib/ws';
-import {BotOptions, CtrlT, Currency} from "./types";
+import {BotOptions, CtrlT, CurrencyNameT} from "./types";
 
 import dotenv from 'dotenv';
-import {UI} from "./UI";
 import {BotCore} from "./BotCore";
 
 
@@ -33,8 +32,8 @@ const start = async () => {
             title: 'Top Potential Arbitrage Triplets, via: ' + process.env.binanceColumns
         },
         arbitrage: {
-            paths: process.env?.binanceColumns?.split(',') as string[],
-            start: process.env.binanceStartingPoint as Currency
+            paths: process.env?.binanceColumns?.split(',') as CurrencyNameT[],
+            start: process.env.binanceStartingPoint as CurrencyNameT
         },
         storage: {
             logHistory: false
@@ -65,9 +64,9 @@ const start = async () => {
         exchange: exchangeAPI,
     };
 
-    ctrl.UI = new UI(ctrl.options)
+    // ctrl.UI = new UI(ctrl.options)
 
-    new BotCore(ctrl);
+    new BotCore(ctrl, false);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
 
