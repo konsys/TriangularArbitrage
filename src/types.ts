@@ -20,8 +20,6 @@ export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' | 'AXL' | 'JPY' | 'DO
 export type SideT = 'SELL' | 'BUY'
 
 type DoubleName = `${CurrencyNameT}${CurrencyNameT}`;
-type TripleName = `${CurrencyNameT}${CurrencyNameT}${CurrencyNameT}`;
-
 
 type Trading = {
     paperOnly: boolean

@@ -37,7 +37,7 @@ export class CurrencyCore {
     streams: StreamsT = streamsDefault
     steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
     events: EventsT = {
-        onAllTickerStream: (stream: any) => undefined
+        onAllTickerStream: () => undefined
     };
 
     controller: CtrlT;
@@ -173,7 +173,7 @@ export class CurrencyCore {
 
 
         const akeys: CurrencyDataT[] = [];
-        apairs.map((obj, i, array) => {
+        apairs.map((obj) => {
             akeys[obj.s.replace(keys.a, '')] = obj;
         });
 
