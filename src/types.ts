@@ -94,8 +94,8 @@ interface Cand {
     c_step_from: CurrencyNameT;
     c_step_to: CurrencyNameT;
     rate: number
-    rates: number[]
-    hits: number
+    rates?: number[]
+    hits?: number
 }
 
 export type CandidateT = Cand & {
@@ -103,7 +103,7 @@ export type CandidateT = Cand & {
     ts: number
     dt: Date
     a: CurrencyValueT
-    a_symbol: CurrencyNameT
+    a_symbol: DoubleName
     a_step_type: SideT
     a_bid_price: string // '93887.99000000'
     a_bid_quantity: string // '5.25872000'
@@ -194,11 +194,11 @@ export type CurrencyValueT = {
 
 
 export type CurrencyT = CurrencyValueT & {
-    flipped?: boolean;
-    rate?: number;
-    stepFrom?: CurrencyNameT
-    stepTo?: CurrencyNameT
-    tradeInfo?: {
+    rate: number;
+    flipped: boolean;
+    stepFrom: CurrencyNameT
+    stepTo: CurrencyNameT
+    tradeInfo: {
         symbol: DoubleName
         side: SideT
         type: string
@@ -216,7 +216,7 @@ export type PairT = CurrencyT & {
 export type AllMarketTickersT = {
     arr: CurrencyValueT[]
     obj: CurrencyDataT | {};
-    markets: any;
+    markets: CurrencyValueT[];
 }
 export type StreamsT = {
     allMarketTickers: AllMarketTickersT
@@ -235,4 +235,10 @@ export type ComparisonT = {
     b: CurrencyT
     c: CurrencyT
     rate: number
+}
+
+export type MatchesT = CandidateT & {
+    a: CurrencyT
+    b: CurrencyT
+    c: CurrencyT
 }

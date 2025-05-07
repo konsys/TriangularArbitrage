@@ -10,6 +10,7 @@ import {
     CurrencyNameT,
     CurrencyT,
     CurrencyValueT,
+    MatchesT,
     PairT,
     StepCurrencyT,
     StreamsT
@@ -26,7 +27,7 @@ const streamsDefault: StreamsT = {
     allMarketTickers: {
         arr: [],
         obj: {},
-        markets: {}
+        markets: []
     }
 }
 
@@ -98,7 +99,8 @@ export class CurrencyCore {
         //debugger;
     };
 
-    getCurrencyFromStream = (stream: AllMarketTickersT, fromCur, toCur) => {
+    getCurrencyFromStream = (stream: AllMarketTickersT, fromCur: CurrencyNameT, toCur: CurrencyNameT) => {
+
         if (!stream || !fromCur || !toCur) {
             return;
         }
@@ -138,21 +140,24 @@ export class CurrencyCore {
     };
 
     getArbitrageRate = (stream: AllMarketTickersT, step1: CurrencyNameT, step2: CurrencyNameT, step3: CurrencyNameT) => {
-
-
         if (!stream || !step1 || !step2 || !step3) {
             return
         }
 
-        const ret: any = {
-            a: this.getCurrencyFromStream(stream, step1, step2),
-            b: this.getCurrencyFromStream(stream, step2, step3),
-            c: this.getCurrencyFromStream(stream, step3, step1)
-        };
+        const a = this.getCurrencyFromStream(stream, step1, step2)
+        const b = this.getCurrencyFromStream(stream, step1, step2)
+        const c = this.getCurrencyFromStream(stream, step1, step2)
 
-        if (!ret.a || !ret.b || !ret.c) {
+        if (!a || !b || !c) {
             return;
         }
+
+        const ret: ComparisonT = {
+            a,
+            b,
+            c,
+            rate: 0
+        };
 
         ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
 
@@ -160,7 +165,6 @@ export class CurrencyCore {
     };
 
     getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair: CurrencyNameT, bPair: CurrencyNameT) => {
-
 
         const keys: StepCurrencyT = {
             a: aPair,
@@ -186,7 +190,9 @@ export class CurrencyCore {
             for each bpair key, check if apair has it too.
             If it does, run arbitrage math
         */
-        const bmatches: any[] = [];
+        const bmatches: MatchesT[] = [];
+
+
         for (let i = 0; i < bpairs.length; i++) {
             const bPairTicker = bpairs[i];
 
@@ -211,17 +217,16 @@ export class CurrencyCore {
                     keys.c = match.key;
 
 
-                    const comparison: ComparisonT = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
+                    const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
 
 
                     if (comparison) {
 
                         const dt = new Date();
-                        const triangle = {
+                        const triangle: MatchesT = {
                             ws_ts: comparison.a.E,
                             ts: +dt,
                             dt: dt,
-
                             // these are for storage later
                             a: comparison.a,//full ticker for first pair (BTC->BNB)
                             a_symbol: comparison.a.s,
@@ -234,32 +239,29 @@ export class CurrencyCore {
                             a_ask_quantity: comparison.a.A,
                             a_volume: comparison.a.v,
                             a_trades: comparison.a.n,
-
                             b: comparison.b,
                             b_symbol: comparison.b.s,
                             b_step_from: comparison.b.stepFrom,
                             b_step_to: comparison.b.stepTo,
-                            b_step_type: comparison.b.tradeInfo?.side,
+                            b_step_type: comparison.b.tradeInfo.side,
                             b_bid_price: comparison.b.b,
                             b_bid_quantity: comparison.b.B,
                             b_ask_price: comparison.b.a,
                             b_ask_quantity: comparison.b.A,
                             b_volume: comparison.b.v,
                             b_trades: comparison.b.n,
-
                             c: comparison.c,
                             c_symbol: comparison.c.s,
                             c_step_from: comparison.c.stepFrom,
                             c_step_to: comparison.c.stepTo,
-                            c_step_type: comparison.c.tradeInfo?.side,
+                            c_step_type: comparison.c.tradeInfo.side,
                             c_bid_price: comparison.c.b,
                             c_bid_quantity: comparison.c.B,
                             c_ask_price: comparison.c.a,
                             c_ask_quantity: comparison.c.A,
                             c_volume: comparison.c.v,
                             c_trades: comparison.c.n,
-
-                            rate: comparison.rate
+                            rate: comparison.rate,
                         };
                         // debugger;
                         bmatches.push(triangle);
@@ -273,7 +275,7 @@ export class CurrencyCore {
 
         if (bmatches.length) {
             bmatches.sort(function (a, b) {
-                return parseFloat(b.rate) - parseFloat(a.rate);
+                return parseFloat(b.rate.toString()) - parseFloat(a.rate.toString());
             });
         }
 
