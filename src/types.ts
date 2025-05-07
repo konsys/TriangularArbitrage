@@ -2,6 +2,10 @@ import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
 
 
+export type SocketsT = {
+    allMarketTickerStream?: WebSocket
+}
+export type EventsT = { onAllTickerStream: (stream: CurrencyValueT[]) => void }
 export type UIOptions =
     {
         title: string;
@@ -242,3 +246,5 @@ export type MatchesT = CandidateT & {
     b: CurrencyT
     c: CurrencyT
 }
+
+export type PathOptions = { paths: [CurrencyNameT, CurrencyNameT, CurrencyNameT], start: CurrencyNameT }

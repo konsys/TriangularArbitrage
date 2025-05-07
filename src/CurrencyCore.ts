@@ -1,6 +1,3 @@
-// Required Dependencies: None explicitly mentioned, but assumes a WebSocket library is used by the 'exchange' object.
-// Also assumes the existence of './CurrencySelector.js'
-
 import {
     AllMarketTickersT,
     BinanceRestT,
@@ -10,19 +7,16 @@ import {
     CurrencyNameT,
     CurrencyT,
     CurrencyValueT,
+    EventsT,
     MatchesT,
     PairT,
+    PathOptions,
+    SocketsT,
     StepCurrencyT,
     StreamsT
 } from "./types";
 
 
-type SocketsT = {
-    allMarketTickerStream?: WebSocket
-}
-
-
-type EventsT = { onAllTickerStream: (stream: CurrencyValueT[]) => void }
 const streamsDefault: StreamsT = {
     allMarketTickers: {
         arr: [],
@@ -51,7 +45,6 @@ export class CurrencyCore {
 
         this.controller = ctrl
 
-        //CurrencyCore.startWSockets(exchange, ctrl);
         this.startAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
@@ -92,11 +85,6 @@ export class CurrencyCore {
         setTimeout(() => {
             this.queueTicker(interval);
         }, interval);
-        this.tick();
-    };
-
-    tick = () => {
-        //debugger;
     };
 
     getCurrencyFromStream = (stream: AllMarketTickersT, fromCur: CurrencyNameT, toCur: CurrencyNameT) => {
@@ -145,8 +133,8 @@ export class CurrencyCore {
         }
 
         const a = this.getCurrencyFromStream(stream, step1, step2)
-        const b = this.getCurrencyFromStream(stream, step1, step2)
-        const c = this.getCurrencyFromStream(stream, step1, step2)
+        const b = this.getCurrencyFromStream(stream, step2, step3)
+        const c = this.getCurrencyFromStream(stream, step3, step1)
 
         if (!a || !b || !c) {
             return;
@@ -177,6 +165,7 @@ export class CurrencyCore {
 
 
         const akeys: CurrencyDataT[] = [];
+
         apairs.map((obj) => {
             akeys[obj.s.replace(keys.a, '')] = obj;
         });
@@ -265,35 +254,30 @@ export class CurrencyCore {
                         };
                         // debugger;
                         bmatches.push(triangle);
-
                     }
-
-
                 }
             }
         }
 
         if (bmatches.length) {
-            bmatches.sort(function (a, b) {
-                return parseFloat(b.rate.toString()) - parseFloat(a.rate.toString());
+            bmatches.sort((a, b) => {
+                return (b.rate) - (a.rate);
             });
         }
 
         return bmatches;
     };
 
-    getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options) => {
-        let matches: any[] = [];
-
-
+    getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
+        let matches: MatchesT[] = [];
         for (let i = 0; i < options.paths.length; i++) {
             const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
             matches = matches.concat(pMatches);
         }
 
         if (matches.length) {
-            matches.sort(function (a: any, b: any) {
-                return parseFloat(b.rate) - parseFloat(a.rate);
+            matches.sort((a: MatchesT, b: MatchesT) => {
+                return b.rate - a.rate;
             });
         }
 
@@ -301,19 +285,13 @@ export class CurrencyCore {
     };
 
     startAllTickerStream(exchange: BinanceRestT) {
-
         if (!this.streams.allMarketTickers) {
             this.streams = streamsDefault;
         }
-
         this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: CurrencyValueT[]) => {
-
-
                 return this.events.onAllTickerStream(event)
             }
         );
     };
-
-
 }
 
