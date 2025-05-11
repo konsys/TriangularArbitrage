@@ -6,7 +6,6 @@ import {
     CurrencyDataT,
     CurrencyNameT,
     CurrencyT,
-    CurrencyValueT,
     DynamicCandidateT,
     EventsT,
     PairT,
@@ -15,6 +14,7 @@ import {
     StepCurrencyT,
     StreamsT
 } from "./types";
+import {BybitCurrencyValueT} from "./adapters/types";
 
 
 const streamsDefault: StreamsT = {
@@ -78,7 +78,7 @@ export class CurrencyCore {
         if (!this.streams.allMarketTickers) {
             this.streams = streamsDefault;
         }
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: CurrencyValueT[]) => {
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BybitCurrencyValueT[]) => {
                 return this.events.onAllTickerStream(event)
             }
         );
