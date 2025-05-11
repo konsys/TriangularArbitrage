@@ -1,5 +1,5 @@
 import {CurrencyCore} from './CurrencyCore';
-import {CtrlT} from "./types";
+import {AllMarketTickersT, CtrlT, StreamIdT} from "./types";
 import {TradingCore} from "./TradingCore";
 
 
@@ -15,7 +15,11 @@ export class BotCore {
 
         const tradingCore = new TradingCore(ctrl.options.trading, currencyCore);
 
-        ctrl.storage.streamTick = (stream: any, streamID: string): void => {
+        ctrl.storage.streamTick = (stream: AllMarketTickersT, streamID: StreamIdT): void => {
+
+
+            console.log(111, ctrl.storage)
+            console.log()
             ctrl.storage.streams[streamID] = stream;
 
             if (streamID === 'allMarketTickers') {

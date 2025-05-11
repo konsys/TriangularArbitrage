@@ -42,8 +42,7 @@ export class CurrencyCore {
         }
 
         this.controller = ctrl
-        console.log(111, ctrl)
-        console.log()
+   
         this.startAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
@@ -292,6 +291,6 @@ export class CurrencyCore {
 
         return ret;
     };
-    
+
 }
 

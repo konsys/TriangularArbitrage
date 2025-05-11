@@ -39,12 +39,13 @@ export type BotOptions = {
     storage: { logHistory: boolean },
     trading: Trading
 }
+export type StreamIdT = 'allMarketTickers'
 type Storage = {
     trading: { queue: CandidateQueueObject | null; active: string[] }
     candidates: CandidateT[]
-    streams: string[]
+    streams: Record<StreamIdT, AllMarketTickersT>[]
     pairRanks: Pair[]
-    streamTick?: (stream: any, streamID: string) => any
+    streamTick?: (stream: AllMarketTickersT, streamID: StreamIdT) => void
     rate: number;
     a_step_from: string; // Assuming these are strings based on key generation
     b_step_from: string;
