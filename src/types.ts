@@ -1,12 +1,13 @@
 import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
 import {UI} from "./UI";
+import {BybitCurrencyValueT} from "./adapters/types";
 
 
 export type SocketsT = {
     allMarketTickerStream?: WebSocket
 }
-export type EventsT = { onAllTickerStream: (stream: CurrencyValueT[]) => void }
+export type EventsT = { onAllTickerStream: (stream: BybitCurrencyValueT[]) => void }
 export type UIOptions =
     {
         title: string;
@@ -25,7 +26,7 @@ export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' |
 
 export type SideT = 'SELL' | 'BUY'
 
-type DoubleName = `${CurrencyNameT}${CurrencyNameT}`;
+export type DoubleName = `${CurrencyNameT}${CurrencyNameT}`;
 
 type Trading = {
     paperOnly: boolean
@@ -111,7 +112,7 @@ export type CandidateT = Cand & {
     ws_ts: number
     ts: number
     dt: Date
-    a: CurrencyValueT
+    a: BybitCurrencyValueT
     a_symbol: DoubleName
     a_step_type: SideT
     a_bid_price: string // '93887.99000000'
@@ -120,7 +121,7 @@ export type CandidateT = Cand & {
     a_ask_quantity: string // '1.58963000'
     a_volume: string // '14143.14544000'
     a_trades: number
-    b: CurrencyValueT
+    b: BybitCurrencyValueT
     b_symbol: DoubleName // 'RVNUSDT'
     b_step_type: SideT
     b_bid_price: string // '0.01028000'
@@ -129,7 +130,7 @@ export type CandidateT = Cand & {
     b_ask_quantity: string // '76849.00000000'
     b_volume: string // '123062925.30000000'
     b_trades: number
-    c: CurrencyValueT
+    c: BybitCurrencyValueT
     c_symbol: DoubleName // 'RVNBTC'
     c_step_type: SideT
     c_bid_price: string // '0.00000010'
@@ -175,32 +176,6 @@ export type  BinanceRestT = {
     }
 }
 
-export type CurrencyValueT = {
-    e: string // '24hrTicker',
-    E: number // 1746382298495,
-    s: DoubleName // 'PYTHFDUSD',
-    p: string // '-0.00450000',
-    P: string // '-3.165',
-    w: string // '0.14089887',
-    x: string // '0.14210000',
-    c: string // '0.13770000',
-    Q: string // '1597.70000000',
-    b: string // '0.13710000',
-    B: string // '3750.70000000',
-    a: string // '0.13720000',
-    A: string // '5248.20000000',
-    o: string // '0.14220000',
-    h: string // '0.14500000',
-    l: string // '0.13690000',
-    v: string // '502061.80000000',
-    q: string // '70739.93821000',
-    O: number // 1746295898316,
-    C: number // 1746382298316,
-    F: number // 911668,
-    L: number // 912156,
-    n: number // 489
-}
-
 
 export type CurrencyT = CurrencyValueT & {
     rate: number;
@@ -225,13 +200,13 @@ export type PairT = CurrencyT & {
 export type AllMarketTickersT = {
     arr: CurrencyValueT[]
     obj: CurrencyDataT | {};
-    markets: CurrencyValueT[];
+    markets: BybitCurrencyValueT[];
 }
 export type StreamsT = {
     allMarketTickers: AllMarketTickersT
 }
 
-export type CurrencyDataT = Record<CurrencyNameT, CurrencyValueT>
+export type CurrencyDataT = Record<CurrencyNameT, BybitCurrencyValueT>
 
 export type StepA = 'a'
 export type StepB = 'b'
@@ -246,9 +221,18 @@ export type ComparisonT = {
     rate: number
 }
 
-export type MatchesT = CandidateT & {
+export type DynamicCandidateT = CandidateT & {
     a: CurrencyT
     b: CurrencyT
     c: CurrencyT
 }
 
+export type CurrencyValueT = {
+    symbol: DoubleName;
+    bidPrice: number;
+    bidQuantity: number;
+    askPrice: number;
+    askQuantity: number;
+    volume: number;
+    trades: number;
+}

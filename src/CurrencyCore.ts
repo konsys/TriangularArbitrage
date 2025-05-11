@@ -7,8 +7,8 @@ import {
     CurrencyNameT,
     CurrencyT,
     CurrencyValueT,
+    DynamicCandidateT,
     EventsT,
-    MatchesT,
     PairT,
     PathOptions,
     SocketsT,
@@ -42,7 +42,7 @@ export class CurrencyCore {
         }
 
         this.controller = ctrl
-   
+
         this.startAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
@@ -97,14 +97,14 @@ export class CurrencyCore {
 
     // Called from BorCore
     getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
-        let matches: MatchesT[] = [];
+        let matches: DynamicCandidateT[] = [];
         for (let i = 0; i < options.paths.length; i++) {
             const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
             matches = matches.concat(pMatches);
         }
 
         if (matches.length) {
-            matches.sort((a: MatchesT, b: MatchesT) => {
+            matches.sort((a: DynamicCandidateT, b: DynamicCandidateT) => {
                 return b.rate - a.rate;
             });
         }
@@ -139,7 +139,7 @@ export class CurrencyCore {
             for each bpair key, check if apair has it too.
             If it does, run arbitrage math
         */
-        const bmatches: MatchesT[] = [];
+        const bmatches: DynamicCandidateT[] = [];
 
 
         for (let i = 0; i < bpairs.length; i++) {
@@ -170,7 +170,7 @@ export class CurrencyCore {
                     if (comparison) {
 
                         const dt = new Date();
-                        const triangle: MatchesT = {
+                        const triangle: DynamicCandidateT = {
                             ws_ts: comparison.a.E,
                             ts: +dt,
                             dt: dt,
