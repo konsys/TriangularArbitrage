@@ -1,7 +1,7 @@
 import {BybitCurrencyValueT} from "./types";
-import {CurrencyValueT, DoubleName} from "../types";
+import {CurrencyAdaptedValueT, DoubleName} from "../types";
 
-export const fromtBybit = (value: BybitCurrencyValueT): CurrencyValueT => {
+export const fromtBybit = (value: BybitCurrencyValueT): CurrencyAdaptedValueT => {
     return {
         symbol: value.s as DoubleName,
         bidPrice: Number.parseFloat(value.b),
