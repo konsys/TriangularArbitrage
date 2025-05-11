@@ -1,6 +1,6 @@
 import {DoubleName} from "../types";
 
-export type BybitCurrencyValueT = {
+export type BinanceCurrencyValueT = {
     e: string // '24hrTicker',
     E: number // 1746382298495,
     s: DoubleName // 'PYTHFDUSD',

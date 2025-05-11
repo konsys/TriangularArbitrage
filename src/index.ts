@@ -57,7 +57,7 @@ const start = async () => {
         exchange: exchangeAPI,
     };
 
-    const showUi = false
+    const showUi = true
 
     if (showUi) {
         ctrl.UI = new UI(ctrl.options)

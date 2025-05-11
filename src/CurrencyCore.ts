@@ -3,6 +3,7 @@ import {
     BinanceRestT,
     ComparisonT,
     CtrlT,
+    CurrencyAdaptedValueT,
     CurrencyDataT,
     CurrencyNameT,
     CurrencyT,
@@ -12,9 +13,11 @@ import {
     PathOptions,
     SocketsT,
     StepCurrencyT,
+    StreamIdT,
     StreamsT
 } from "./types";
-import {BybitCurrencyValueT} from "./adapters/types";
+import {BinanceCurrencyValueT} from "./adapters/types";
+import {fromBinance} from "./adapters/BinanceAdapter";
 
 
 const streamsDefault: StreamsT = {
@@ -42,43 +45,41 @@ export class CurrencyCore {
 
         this.controller = ctrl
 
-        this.startAllTickerStream(ctrl.exchange);
+        this.startBinanceAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
-        this.events.onAllTickerStream = (stream) => {
-
-            const key = 'allMarketTickers';
-
-            // Basic array from api arr[0].s = ETHBTC
-            this.streams.allMarketTickers.arr = stream;
-
-            // Mapped object arr[ETHBTC]
-            this.streams.allMarketTickers.obj = stream.reduce((acc, current) => {
-                acc[current.s] = current;
-                return acc;
-            }, {});
-
-            // Sub objects with only data on specific markets
-            for (let i = 0; i < this.steps.length; i++)
-                this.streams.allMarketTickers.markets[this.steps[i]] = stream.filter(e => {
-                    return (e.s.endsWith(this.steps[i]) || e.s.startsWith(this.steps[i]));
-                });
-
-            // something's wrong here. The BNB tree doesn't have BTC, although the BTC tree does.
-
-            if (this.controller && this.controller.storage.streamTick) {
-                this.controller.storage.streamTick(this.streams[key], key);
-            }
-        };
+        this.events.onAllTickerStream = this.onBybitTicket;
 
     }
 
-    startAllTickerStream(exchange: BinanceRestT) {
+    onBybitTicket = (adaptedStream: CurrencyAdaptedValueT[]) => {
+
+        const key: StreamIdT = 'allMarketTickers';
+
+        this.streams.allMarketTickers.arr = adaptedStream;
+
+        this.streams.allMarketTickers.obj = adaptedStream.reduce((acc, current) => {
+            acc[current.symbol] = current;
+            return acc;
+        }, {});
+
+        // Sub objects with only data on specific markets
+        for (let i = 0; i < this.steps.length; i++)
+            this.streams.allMarketTickers.markets[this.steps[i]] = adaptedStream.filter(e => {
+                return (e.symbol.endsWith(this.steps[i]) || e.symbol.startsWith(this.steps[i]));
+            });
+
+        if (this.controller && this.controller.storage.streamTick) {
+            this.controller.storage.streamTick(this.streams[key], key);
+        }
+    }
+
+    startBinanceAllTickerStream(exchange: BinanceRestT) {
         if (!this.streams.allMarketTickers) {
             this.streams = streamsDefault;
         }
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BybitCurrencyValueT[]) => {
-                return this.events.onAllTickerStream(event)
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BinanceCurrencyValueT[]) => {
+                return this.events.onAllTickerStream(event.map(fromBinance))
             }
         );
     };
@@ -97,6 +98,7 @@ export class CurrencyCore {
     // Called from BorCore
     getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
         let matches: DynamicCandidateT[] = [];
+
         for (let i = 0; i < options.paths.length; i++) {
             const pMatches: DynamicCandidateT[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
             matches = matches.concat(pMatches);
@@ -108,8 +110,7 @@ export class CurrencyCore {
             });
         }
 
-        console.log(matches)
-        console.log()
+
         return matches;
     };
 
@@ -128,7 +129,7 @@ export class CurrencyCore {
         const akeys: CurrencyDataT[] = [];
 
         aPairs.map((obj) => {
-            akeys[obj.s.replace(keys.a, '')] = obj;
+            akeys[obj.symbol.replace(keys.a, '')] = obj;
         });
 
 
@@ -147,14 +148,14 @@ export class CurrencyCore {
             const bPairTicker = bPairs[i];
 
 
-            bPairTicker.key = bPairTicker.s.replace(keys.b, '') as CurrencyNameT;
+            bPairTicker.key = bPairTicker.symbol.replace(keys.b, '') as CurrencyNameT;
 
 
             // from B to C
-            bPairTicker.startsWithKey = bPairTicker.s.startsWith(keys.b);
+            bPairTicker.startsWithKey = bPairTicker.symbol.startsWith(keys.b);
 
             // from C to B
-            bPairTicker.endsWithKey = bPairTicker.s.endsWith(keys.b);
+            bPairTicker.endsWithKey = bPairTicker.symbol.endsWith(keys.b);
 
             if (akeys[bPairTicker.key]) {
                 const match = bPairTicker;
@@ -172,43 +173,43 @@ export class CurrencyCore {
 
                         const dt = new Date();
                         const triangle: DynamicCandidateT = {
-                            ws_ts: comparison.a.E,
+                            ws_ts: comparison.a.timestamp,
                             ts: +dt,
                             dt: dt,
                             // these are for storage later
                             a: comparison.a,//full ticker for first pair (BTC->BNB)
-                            a_symbol: comparison.a.s,
+                            a_symbol: comparison.a.symbol,
                             a_step_from: comparison.a.stepFrom,//btc
                             a_step_to: comparison.a.stepTo,//bnb
                             a_step_type: comparison.a.tradeInfo?.side,
-                            a_bid_price: comparison.a.b,
-                            a_bid_quantity: comparison.a.B,
-                            a_ask_price: comparison.a.a,
-                            a_ask_quantity: comparison.a.A,
-                            a_volume: comparison.a.v,
-                            a_trades: comparison.a.n,
+                            a_bid_price: comparison.a.bidPrice,
+                            a_bid_quantity: comparison.a.bidQuantity,
+                            a_ask_price: comparison.a.askPrice,
+                            a_ask_quantity: comparison.a.askQuantity,
+                            a_volume: comparison.a.volume,
+                            a_trades: comparison.a.trades,
                             b: comparison.b,
-                            b_symbol: comparison.b.s,
+                            b_symbol: comparison.b.symbol,
                             b_step_from: comparison.b.stepFrom,
                             b_step_to: comparison.b.stepTo,
                             b_step_type: comparison.b.tradeInfo.side,
-                            b_bid_price: comparison.b.b,
-                            b_bid_quantity: comparison.b.B,
-                            b_ask_price: comparison.b.a,
-                            b_ask_quantity: comparison.b.A,
-                            b_volume: comparison.b.v,
-                            b_trades: comparison.b.n,
+                            b_bid_price: comparison.b.bidPrice,
+                            b_bid_quantity: comparison.b.bidQuantity,
+                            b_ask_price: comparison.b.askPrice,
+                            b_ask_quantity: comparison.b.askQuantity,
+                            b_volume: comparison.b.volume,
+                            b_trades: comparison.b.trades,
                             c: comparison.c,
-                            c_symbol: comparison.c.s,
+                            c_symbol: comparison.c.symbol,
                             c_step_from: comparison.c.stepFrom,
                             c_step_to: comparison.c.stepTo,
                             c_step_type: comparison.c.tradeInfo.side,
-                            c_bid_price: comparison.c.b,
-                            c_bid_quantity: comparison.c.B,
-                            c_ask_price: comparison.c.a,
-                            c_ask_quantity: comparison.c.A,
-                            c_volume: comparison.c.v,
-                            c_trades: comparison.c.n,
+                            c_bid_price: comparison.c.bidPrice,
+                            c_bid_quantity: comparison.c.bidQuantity,
+                            c_ask_price: comparison.c.askPrice,
+                            c_ask_quantity: comparison.c.askQuantity,
+                            c_volume: comparison.c.volume,
+                            c_trades: comparison.c.trades,
                             rate: comparison.rate,
                         };
                         // debugger;
@@ -242,7 +243,7 @@ export class CurrencyCore {
         if (currency) {
             // found a match using reversed binance syntax, meaning we're buying if we're going from->to (btc->xxx in xxxBTC ticker) using a fromCurtoCur ticker.
             currency.flipped = false;
-            currency.rate = +currency.a;
+            currency.rate = +currency.askPrice;
 
         } else {
             currency = stream.obj[fromCur + toCur];
@@ -250,7 +251,7 @@ export class CurrencyCore {
                 return;
             }
             currency.flipped = true;
-            currency.rate = (1 / +currency.b);
+            currency.rate = (1 / +currency.bidPrice);
 
         }
         currency.stepFrom = fromCur;
@@ -258,7 +259,7 @@ export class CurrencyCore {
 
 
         currency.tradeInfo = {
-            symbol: currency.s,
+            symbol: currency.symbol,
             side: currency.flipped ? 'SELL' : 'BUY',
             type: 'MARKET',
             quantity: 1
