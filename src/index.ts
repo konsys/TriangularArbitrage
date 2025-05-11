@@ -1,7 +1,7 @@
 import {logger} from './LoggerCore';
 import rest from 'binance/lib/rest';
 import ws from 'binance/lib/ws';
-import {BotOptions, CtrlT, CurrencyNameT} from "./types";
+import {BotOptions, CtrlT, CurrencyNameT, Storage} from "./types";
 
 import dotenv from 'dotenv';
 import {BotCore} from "./BotCore";
@@ -30,9 +30,7 @@ const start = async () => {
             paths: process.env?.binanceColumns?.split(',') as [CurrencyNameT, CurrencyNameT, CurrencyNameT],
             start: process.env.binanceStartingPoint as CurrencyNameT
         },
-        storage: {
-            logHistory: false
-        },
+        storage: {} as Storage,
         trading: {
             paperOnly: true,
             minQueuePercentageThreshold: 3,
@@ -60,11 +58,12 @@ const start = async () => {
     };
 
     const showUi = false
-
+    console.log(1111, new UI(ctrl.options))
+    console.log()
     if (showUi) {
         ctrl.UI = new UI(ctrl.options)
     }
-    new BotCore(ctrl, showUi);
+    new BotCore(ctrl);
 
     ctrl.logger.info('----- Bot Startup Finished -----');
 

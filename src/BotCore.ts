@@ -4,22 +4,13 @@ import {TradingCore} from "./TradingCore";
 
 
 export class BotCore {
-    isUI = false
-
-    constructor(ctrl: CtrlT, ui: boolean) {
-        this.isUI = ui
+    constructor(ctrl: CtrlT) {
         const currencyCore = new CurrencyCore(ctrl);
-
-
         ctrl.currencyCore = currencyCore
-
         const tradingCore = new TradingCore(ctrl.options.trading, currencyCore);
 
         ctrl.storage.streamTick = (stream: AllMarketTickersT, streamID: StreamIdT): void => {
 
-
-            console.log(111, ctrl.storage)
-            console.log()
             ctrl.storage.streams[streamID] = stream;
 
             if (streamID === 'allMarketTickers') {
@@ -34,7 +25,7 @@ export class BotCore {
                     tradingCore.updateCandidateQueue(stream, ctrl.storage.candidates, ctrl.storage.trading.queue);
                 }
 
-                if (this.isUI) {
+                if (ctrl.UI) {
                     ctrl.UI.updateArbitrageOpportunities(ctrl.storage.candidates);
                 }
 

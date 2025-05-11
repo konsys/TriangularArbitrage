@@ -11,7 +11,8 @@ export type UIOptions =
         title: string;
     };
 
-export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' | 'AXL' | 'JPY' | 'DOGE' | 'HBAR' |
+export type CurrencyNameT = 'BTC' | 'USDT' | 'BNB' | 'ETH' |
+    'AXL' | 'JPY' | 'DOGE' | 'HBAR' |
     'BCH' | 'TRY' | 'ZRO' | 'EUR' |
     'SSV' | 'SLF' | 'STPT' | 'SOL' |
     'PYR' | 'BICO' | 'LOKA' | 'NMR' |
@@ -40,7 +41,7 @@ export type BotOptions = {
     trading: Trading
 }
 export type StreamIdT = 'allMarketTickers'
-type Storage = {
+export type Storage = {
     trading: { queue: CandidateQueueObject | null; active: string[] }
     candidates: CandidateT[]
     streams: Record<StreamIdT, AllMarketTickersT>[]
