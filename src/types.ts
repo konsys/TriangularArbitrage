@@ -36,7 +36,7 @@ export type PathOptions = { paths: [CurrencyNameT, CurrencyNameT, CurrencyNameT]
 export type BotOptions = {
     UI: UIOptions,
     arbitrage: PathOptions,
-    storage: { logHistory: boolean },
+    storage: Storage,
     trading: Trading
 }
 export type StreamIdT = 'allMarketTickers'
@@ -61,7 +61,7 @@ export type CtrlT = {
     logger: Logger,
     exchange: BinanceRestT
     currencyCore?: CurrencyCore
-    UI?: any
+    UI?: UIOptions
 }
 
 
