@@ -1,13 +1,11 @@
 import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
 import {UI} from "./UI";
-import {BybitCurrencyValueT} from "./adapters/types";
-
 
 export type SocketsT = {
     allMarketTickerStream?: WebSocket
 }
-export type EventsT = { onAllTickerStream: (stream: BybitCurrencyValueT[]) => void }
+export type EventsT = { onAllTickerStream: (stream: CurrencyAdaptedValueT[]) => void }
 export type UIOptions =
     {
         title: string;
@@ -112,7 +110,7 @@ export type CandidateT = Cand & {
     ws_ts: number
     ts: number
     dt: Date
-    a: BybitCurrencyValueT
+    a: CurrencyAdaptedValueT
     a_symbol: DoubleName
     a_step_type: SideT
     a_bid_price: string // '93887.99000000'
@@ -121,7 +119,7 @@ export type CandidateT = Cand & {
     a_ask_quantity: string // '1.58963000'
     a_volume: string // '14143.14544000'
     a_trades: number
-    b: BybitCurrencyValueT
+    b: CurrencyAdaptedValueT
     b_symbol: DoubleName // 'RVNUSDT'
     b_step_type: SideT
     b_bid_price: string // '0.01028000'
@@ -130,7 +128,7 @@ export type CandidateT = Cand & {
     b_ask_quantity: string // '76849.00000000'
     b_volume: string // '123062925.30000000'
     b_trades: number
-    c: BybitCurrencyValueT
+    c: CurrencyAdaptedValueT
     c_symbol: DoubleName // 'RVNBTC'
     c_step_type: SideT
     c_bid_price: string // '0.00000010'
@@ -177,7 +175,7 @@ export type  BinanceRestT = {
 }
 
 
-export type CurrencyT = BybitCurrencyValueT & {
+export type CurrencyT = CurrencyAdaptedValueT & {
     rate: number;
     flipped: boolean;
     stepFrom: CurrencyNameT
@@ -198,15 +196,15 @@ export type PairT = CurrencyT & {
 
 
 export type AllMarketTickersT = {
-    arr: BybitCurrencyValueT[]
+    arr: CurrencyAdaptedValueT[]
     obj: CurrencyDataT | {};
-    markets: BybitCurrencyValueT[];
+    markets: CurrencyAdaptedValueT[];
 }
 export type StreamsT = {
     allMarketTickers: AllMarketTickersT
 }
 
-export type CurrencyDataT = Record<CurrencyNameT, BybitCurrencyValueT>
+export type CurrencyDataT = Record<CurrencyNameT, CurrencyAdaptedValueT>
 
 export type StepA = 'a'
 export type StepB = 'b'
@@ -228,11 +226,16 @@ export type DynamicCandidateT = CandidateT & {
 }
 
 export type CurrencyAdaptedValueT = {
+    open: string;
+    low: string;
+    high: string;
+    close: string;
+    timestamp: number;
     symbol: DoubleName;
-    bidPrice: number;
-    bidQuantity: number;
-    askPrice: number;
-    askQuantity: number;
-    volume: number;
+    bidPrice: string;
+    bidQuantity: string;
+    askPrice: string;
+    askQuantity: string;
+    volume: string;
     trades: number;
 }

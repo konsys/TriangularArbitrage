@@ -8,7 +8,7 @@ export class UI {
     cols: number[]
     blankLine: any
     header: any
-    maxRows: number = 4
+    maxRows: number = 499
     line: any
 
     constructor(options) {
