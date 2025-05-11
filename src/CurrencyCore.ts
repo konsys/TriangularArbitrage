@@ -25,7 +25,6 @@ const streamsDefault: StreamsT = {
     }
 }
 
-
 export class CurrencyCore {
     sockets: SocketsT = {}
     streams: StreamsT = streamsDefault
@@ -99,7 +98,7 @@ export class CurrencyCore {
     getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
         let matches: DynamicCandidateT[] = [];
         for (let i = 0; i < options.paths.length; i++) {
-            const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
+            const pMatches: DynamicCandidateT[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
             matches = matches.concat(pMatches);
         }
 
@@ -109,6 +108,8 @@ export class CurrencyCore {
             });
         }
 
+        console.log(matches)
+        console.log()
         return matches;
     };
 
@@ -120,13 +121,13 @@ export class CurrencyCore {
             c: aPair
         };
 
-        const apairs: PairT[] = stream.markets[keys.a];
-        const bpairs: PairT[] = stream.markets[keys.b];
+        const aPairs: PairT[] = stream.markets[keys.a];
+        const bPairs: PairT[] = stream.markets[keys.b];
 
 
         const akeys: CurrencyDataT[] = [];
 
-        apairs.map((obj) => {
+        aPairs.map((obj) => {
             akeys[obj.s.replace(keys.a, '')] = obj;
         });
 
@@ -135,15 +136,15 @@ export class CurrencyCore {
         delete akeys[keys.b];
 
         /*
-          Loop through BPairs
+          Loop through bPairs
             for each bpair key, check if apair has it too.
             If it does, run arbitrage math
         */
         const bmatches: DynamicCandidateT[] = [];
 
 
-        for (let i = 0; i < bpairs.length; i++) {
-            const bPairTicker = bpairs[i];
+        for (let i = 0; i < bPairs.length; i++) {
+            const bPairTicker = bPairs[i];
 
 
             bPairTicker.key = bPairTicker.s.replace(keys.b, '') as CurrencyNameT;

@@ -58,8 +58,7 @@ const start = async () => {
     };
 
     const showUi = false
-    console.log(1111, new UI(ctrl.options))
-    console.log()
+
     if (showUi) {
         ctrl.UI = new UI(ctrl.options)
     }
