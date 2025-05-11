@@ -31,14 +31,16 @@ type Trading = {
     minHitsThreshold: number
 }
 
+export type PathOptions = { paths: [CurrencyNameT, CurrencyNameT, CurrencyNameT], start: CurrencyNameT }
+
 export type BotOptions = {
     UI: UIOptions,
-    arbitrage: { paths?: CurrencyNameT[], start?: CurrencyNameT },
+    arbitrage: PathOptions,
     storage: { logHistory: boolean },
     trading: Trading
 }
 type Storage = {
-    trading: { queue: CandidateQueueObject | {}; active: string[] }
+    trading: { queue: CandidateQueueObject | null; active: string[] }
     candidates: CandidateT[]
     streams: string[]
     pairRanks: Pair[]
@@ -247,4 +249,3 @@ export type MatchesT = CandidateT & {
     c: CurrencyT
 }
 
-export type PathOptions = { paths: [CurrencyNameT, CurrencyNameT, CurrencyNameT], start: CurrencyNameT }

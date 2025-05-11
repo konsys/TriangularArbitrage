@@ -26,8 +26,10 @@ export class TradingCore extends EventEmitter {
     }
 
 
-    public updateCandidateQueue(stream: any, candidates: CandidateT[], queue: CandidateQueueObject): CandidateT[] {
-
+    public updateCandidateQueue(stream: any, candidates: CandidateT[], queue: CandidateQueueObject | null): CandidateT[] {
+        if (!queue) {
+            return []
+        }
 
         for (let i = 0; i < candidates.length; i++) {
             let cand: CandidateT = candidates[i];
@@ -92,7 +94,7 @@ export class TradingCore extends EventEmitter {
             // Ensure cand.hits exists and meets the threshold
             if (cand.hits && cand.hits >= this._minHitsThreshold) {
 
-                let liveRate: ArbitrageRateResult | null | undefined = this._currencyCore.getArbitrageRate(stream, cand.a_step_from, cand.b_step_from, cand.c_step_from);
+                const liveRate: ArbitrageRateResult | undefined = this._currencyCore.getArbitrageRate(stream, cand.a_step_from, cand.b_step_from, cand.c_step_from);
                 // Check if liveRate is not null/undefined and its rate meets the threshold
                 if (liveRate && liveRate.rate >= this._minQueuePercentageThreshold) {
                     this.emit('newTradeQueued', cand, this.time());

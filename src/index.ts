@@ -12,14 +12,8 @@ dotenv.config({path: '../.env'});
 
 
 const start = async () => {
-
-
     logger.info('--- Loading Exchange API');
-
-
     logger.info('--- \tActive Exchange:' + process.env.activeExchange);
-
-
     const beautifyResponse: boolean = false;
     let exchangeAPI = new rest({
         timeout: parseInt(process.env.restTimeout as string),
@@ -33,7 +27,7 @@ const start = async () => {
             title: 'Top Potential Arbitrage Triplets, via: ' + process.env.binanceColumns
         },
         arbitrage: {
-            paths: process.env?.binanceColumns?.split(',') as CurrencyNameT[],
+            paths: process.env?.binanceColumns?.split(',') as [CurrencyNameT, CurrencyNameT, CurrencyNameT],
             start: process.env.binanceStartingPoint as CurrencyNameT
         },
         storage: {
@@ -50,7 +44,7 @@ const start = async () => {
         options: botOptions,
         storage: {
             trading: {
-                queue: {},
+                queue: null,
                 active: []
             },
             candidates: [],
@@ -65,7 +59,7 @@ const start = async () => {
         exchange: exchangeAPI,
     };
 
-    const showUi = true
+    const showUi = false
 
     if (showUi) {
         ctrl.UI = new UI(ctrl.options)

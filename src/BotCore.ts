@@ -9,6 +9,8 @@ export class BotCore {
     constructor(ctrl: CtrlT, ui: boolean) {
         this.isUI = ui
         const currencyCore = new CurrencyCore(ctrl);
+
+
         ctrl.currencyCore = currencyCore
 
         const tradingCore = new TradingCore(ctrl.options.trading, currencyCore);
@@ -32,12 +34,9 @@ export class BotCore {
                     ctrl.UI.updateArbitrageOpportunities(ctrl.storage.candidates);
                 }
 
-
             }
         };
-
         ctrl.logger.info('--- Starting Currency Streams');
 
-
     }
-};
+}

@@ -27,7 +27,6 @@ const streamsDefault: StreamsT = {
 
 
 export class CurrencyCore {
-
     sockets: SocketsT = {}
     streams: StreamsT = streamsDefault
     steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
@@ -37,14 +36,14 @@ export class CurrencyCore {
 
     controller: CtrlT;
 
-
     constructor(ctrl: CtrlT) {
         if (!ctrl.exchange) {
             throw 'Undefined currency exchange connector. Will not be able to communicate with exchange API.';
         }
 
         this.controller = ctrl
-
+        console.log(111, ctrl)
+        console.log()
         this.startAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
@@ -76,6 +75,15 @@ export class CurrencyCore {
 
     }
 
+    startAllTickerStream(exchange: BinanceRestT) {
+        if (!this.streams.allMarketTickers) {
+            this.streams = streamsDefault;
+        }
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: CurrencyValueT[]) => {
+                return this.events.onAllTickerStream(event)
+            }
+        );
+    };
 
     queueTicker = (interval: number) => {
         if (!interval) {
@@ -87,69 +95,22 @@ export class CurrencyCore {
         }, interval);
     };
 
-    getCurrencyFromStream = (stream: AllMarketTickersT, fromCur: CurrencyNameT, toCur: CurrencyNameT) => {
 
-        if (!stream || !fromCur || !toCur) {
-            return;
+    // Called from BorCore
+    getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
+        let matches: MatchesT[] = [];
+        for (let i = 0; i < options.paths.length; i++) {
+            const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
+            matches = matches.concat(pMatches);
         }
 
-        /*
-         Binance uses xxxBTC notation. If we're looking at xxxBTC and we want to go from BTC to xxx, that means we're buying, vice versa for selling.
-        */
-        let currency: CurrencyT = stream.obj[toCur + fromCur];
-
-
-        if (currency) {
-            // found a match using reversed binance syntax, meaning we're buying if we're going from->to (btc->xxx in xxxBTC ticker) using a fromCurtoCur ticker.
-            currency.flipped = false;
-            currency.rate = +currency.a;
-
-        } else {
-            currency = stream.obj[fromCur + toCur];
-            if (!currency) {
-                return;
-            }
-            currency.flipped = true;
-            currency.rate = (1 / +currency.b);
-
-        }
-        currency.stepFrom = fromCur;
-        currency.stepTo = toCur;
-
-
-        currency.tradeInfo = {
-            symbol: currency.s,
-            side: currency.flipped ? 'SELL' : 'BUY',
-            type: 'MARKET',
-            quantity: 1
-        };
-
-        return currency;
-    };
-
-    getArbitrageRate = (stream: AllMarketTickersT, step1: CurrencyNameT, step2: CurrencyNameT, step3: CurrencyNameT) => {
-        if (!stream || !step1 || !step2 || !step3) {
-            return
+        if (matches.length) {
+            matches.sort((a: MatchesT, b: MatchesT) => {
+                return b.rate - a.rate;
+            });
         }
 
-        const a = this.getCurrencyFromStream(stream, step1, step2)
-        const b = this.getCurrencyFromStream(stream, step2, step3)
-        const c = this.getCurrencyFromStream(stream, step3, step1)
-
-        if (!a || !b || !c) {
-            return;
-        }
-
-        const ret: ComparisonT = {
-            a,
-            b,
-            c,
-            rate: 0
-        };
-
-        ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
-
-        return ret;
+        return matches;
     };
 
     getCandidatesFromStreamViaPath = (stream: AllMarketTickersT, aPair: CurrencyNameT, bPair: CurrencyNameT) => {
@@ -205,9 +166,7 @@ export class CurrencyCore {
                 if (stepC) {
                     keys.c = match.key;
 
-
                     const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
-
 
                     if (comparison) {
 
@@ -268,30 +227,71 @@ export class CurrencyCore {
         return bmatches;
     };
 
-    getDynamicCandidatesFromStream = (stream: AllMarketTickersT, options: PathOptions) => {
-        let matches: MatchesT[] = [];
-        for (let i = 0; i < options.paths.length; i++) {
-            const pMatches: any[] = this.getCandidatesFromStreamViaPath(stream, options.start, options.paths[i]);
-            matches = matches.concat(pMatches);
+    getCurrencyFromStream = (stream: AllMarketTickersT, fromCur: CurrencyNameT, toCur: CurrencyNameT) => {
+
+        if (!stream || !fromCur || !toCur) {
+            return;
         }
 
-        if (matches.length) {
-            matches.sort((a: MatchesT, b: MatchesT) => {
-                return b.rate - a.rate;
-            });
-        }
+        /*
+         Binance uses xxxBTC notation. If we're looking at xxxBTC and we want to go from BTC to xxx, that means we're buying, vice versa for selling.
+        */
+        let currency: CurrencyT = stream.obj[toCur + fromCur];
 
-        return matches;
-    };
 
-    startAllTickerStream(exchange: BinanceRestT) {
-        if (!this.streams.allMarketTickers) {
-            this.streams = streamsDefault;
-        }
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: CurrencyValueT[]) => {
-                return this.events.onAllTickerStream(event)
+        if (currency) {
+            // found a match using reversed binance syntax, meaning we're buying if we're going from->to (btc->xxx in xxxBTC ticker) using a fromCurtoCur ticker.
+            currency.flipped = false;
+            currency.rate = +currency.a;
+
+        } else {
+            currency = stream.obj[fromCur + toCur];
+            if (!currency) {
+                return;
             }
-        );
+            currency.flipped = true;
+            currency.rate = (1 / +currency.b);
+
+        }
+        currency.stepFrom = fromCur;
+        currency.stepTo = toCur;
+
+
+        currency.tradeInfo = {
+            symbol: currency.s,
+            side: currency.flipped ? 'SELL' : 'BUY',
+            type: 'MARKET',
+            quantity: 1
+        };
+
+        return currency;
     };
+
+
+    getArbitrageRate = (stream: AllMarketTickersT, step1: CurrencyNameT, step2: CurrencyNameT, step3: CurrencyNameT) => {
+        if (!stream || !step1 || !step2 || !step3) {
+            return
+        }
+
+        const a = this.getCurrencyFromStream(stream, step1, step2)
+        const b = this.getCurrencyFromStream(stream, step2, step3)
+        const c = this.getCurrencyFromStream(stream, step3, step1)
+
+        if (!a || !b || !c) {
+            return;
+        }
+
+        const ret: ComparisonT = {
+            a,
+            b,
+            c,
+            rate: 0
+        };
+
+        ret.rate = (ret.a.rate) * (ret.b.rate) * (ret.c.rate);
+
+        return ret;
+    };
+    
 }
 
