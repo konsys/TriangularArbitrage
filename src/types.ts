@@ -1,5 +1,6 @@
 import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
+import {UI} from "./UI";
 
 
 export type SocketsT = {
@@ -62,7 +63,7 @@ export type CtrlT = {
     logger: Logger,
     exchange: BinanceRestT
     currencyCore?: CurrencyCore
-    UI?: UIOptions
+    UI?: UI
 }
 
 
