@@ -31,7 +31,7 @@ const streamsDefault: StreamsT = {
 export class CurrencyCore {
     sockets: SocketsT = {}
     streams: StreamsT = streamsDefault
-    steps: string[] = ['BTC', 'ETH', 'BNB', 'USDT'];
+    steps: CurrencyNameT[] = ['BTC', 'ETH', 'BNB', 'USDT'];
     events: EventsT = {
         onAllTickerStream: () => undefined
     };
@@ -48,20 +48,30 @@ export class CurrencyCore {
         this.startBinanceAllTickerStream(ctrl.exchange);
         this.queueTicker(5000);
 
-        this.events.onAllTickerStream = this.onBybitTicket;
+        this.events.onAllTickerStream = this.onTicket;
+
 
     }
 
-    onBybitTicket = (adaptedStream: CurrencyAdaptedValueT[]) => {
+    startBinanceAllTickerStream(exchange: BinanceRestT) {
+        if (!this.streams.allMarketTickers) {
+            this.streams = streamsDefault;
+        }
 
+        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BinanceCurrencyValueT[]) => {
+                return this.events.onAllTickerStream(event.map(fromBinance))
+            }
+        );
+    };
+
+    onTicket = (adaptedStream: CurrencyAdaptedValueT[]) => {
         const key: StreamIdT = 'allMarketTickers';
-
         this.streams.allMarketTickers.arr = adaptedStream;
-
         this.streams.allMarketTickers.obj = adaptedStream.reduce((acc, current) => {
             acc[current.symbol] = current;
             return acc;
         }, {});
+
 
         // Sub objects with only data on specific markets
         for (let i = 0; i < this.steps.length; i++)
@@ -74,15 +84,6 @@ export class CurrencyCore {
         }
     }
 
-    startBinanceAllTickerStream(exchange: BinanceRestT) {
-        if (!this.streams.allMarketTickers) {
-            this.streams = streamsDefault;
-        }
-        this.sockets.allMarketTickerStream = exchange.WS.onAllTickers((event: BinanceCurrencyValueT[]) => {
-                return this.events.onAllTickerStream(event.map(fromBinance))
-            }
-        );
-    };
 
     queueTicker = (interval: number) => {
         if (!interval) {
@@ -126,22 +127,22 @@ export class CurrencyCore {
         const bPairs: PairT[] = stream.markets[keys.b];
 
 
-        const akeys: CurrencyDataT[] = [];
+        const aKeys: CurrencyDataT[] = [];
 
         aPairs.map((obj) => {
-            akeys[obj.symbol.replace(keys.a, '')] = obj;
+            aKeys[obj.symbol.replace(keys.a, '')] = obj;
         });
 
 
         // prevent 1-steps
-        delete akeys[keys.b];
+        delete aKeys[keys.b];
 
         /*
           Loop through bPairs
             for each bpair key, check if apair has it too.
             If it does, run arbitrage math
         */
-        const bmatches: DynamicCandidateT[] = [];
+        const bMatches: DynamicCandidateT[] = [];
 
 
         for (let i = 0; i < bPairs.length; i++) {
@@ -157,7 +158,7 @@ export class CurrencyCore {
             // from C to B
             bPairTicker.endsWithKey = bPairTicker.symbol.endsWith(keys.b);
 
-            if (akeys[bPairTicker.key]) {
+            if (aKeys[bPairTicker.key]) {
                 const match = bPairTicker;
 
 
@@ -213,19 +214,19 @@ export class CurrencyCore {
                             rate: comparison.rate,
                         };
                         // debugger;
-                        bmatches.push(triangle);
+                        bMatches.push(triangle);
                     }
                 }
             }
         }
 
-        if (bmatches.length) {
-            bmatches.sort((a, b) => {
+        if (bMatches.length) {
+            bMatches.sort((a, b) => {
                 return (b.rate) - (a.rate);
             });
         }
 
-        return bmatches;
+        return bMatches;
     };
 
     getCurrencyFromStream = (stream: AllMarketTickersT, fromCur: CurrencyNameT, toCur: CurrencyNameT) => {

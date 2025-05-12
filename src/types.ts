@@ -1,4 +1,3 @@
-import {Logger} from "winston";
 import {CurrencyCore} from "./CurrencyCore";
 import {UI} from "./UI";
 
@@ -59,7 +58,6 @@ export type Storage = {
 export type CtrlT = {
     options: BotOptions,
     storage: Storage,
-    logger: Logger,
     exchange: BinanceRestT
     currencyCore?: CurrencyCore
     UI?: UI

@@ -1,7 +1,7 @@
 import {CurrencyCore} from './CurrencyCore';
 import {AllMarketTickersT, CtrlT, StreamIdT} from "./types";
 import {TradingCore} from "./TradingCore";
-
+import {logger} from './LoggerCore';
 
 export class BotCore {
     constructor(ctrl: CtrlT) {
@@ -15,7 +15,7 @@ export class BotCore {
 
             if (streamID === 'allMarketTickers') {
                 if (!ctrl.currencyCore) {
-                    ctrl.logger.info('Warning: currencyCore not initialized when streamTick received data.');
+                    logger.info('Warning: currencyCore not initialized when streamTick received data.');
                     return;
                 }
 
@@ -31,7 +31,7 @@ export class BotCore {
 
             }
         };
-        ctrl.logger.info('--- Starting Currency Streams');
+        logger.info('--- Starting Currency Streams');
 
     }
 }

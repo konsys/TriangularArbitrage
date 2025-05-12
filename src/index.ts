@@ -1,7 +1,7 @@
 import {logger} from './LoggerCore';
 import rest from 'binance/lib/rest';
 import ws from 'binance/lib/ws';
-import {BotOptions, CtrlT, CurrencyNameT, Storage} from "./types";
+import {BinanceRestT, BotOptions, CtrlT, CurrencyNameT, Storage} from "./types";
 
 import dotenv from 'dotenv';
 import {BotCore} from "./BotCore";
@@ -15,7 +15,7 @@ const start = async () => {
     logger.info('--- Loading Exchange API');
     logger.info('--- \tActive Exchange:' + process.env.activeExchange);
     const beautifyResponse: boolean = false;
-    let exchangeAPI = new rest({
+    let exchangeAPI: BinanceRestT = new rest({
         timeout: parseInt(process.env.restTimeout as string),
         recvWindow: parseInt(process.env.restRecvWindow as string),
         disableBeautification: beautifyResponse
@@ -53,7 +53,6 @@ const start = async () => {
             b_step_from: '',
             c_step_from: '',
         },
-        logger: logger,
         exchange: exchangeAPI,
     };
 
@@ -64,7 +63,7 @@ const start = async () => {
     }
     new BotCore(ctrl);
 
-    ctrl.logger.info('----- Bot Startup Finished -----');
+    logger.info('----- Bot Startup Finished -----');
 
 }
 
