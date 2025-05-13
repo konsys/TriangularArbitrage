@@ -50,7 +50,6 @@ export class CurrencyCore {
 
         this.events.onAllTickerStream = this.onTicket;
 
-
     }
 
     startBinanceAllTickerStream(exchange: BinanceRestT) {
@@ -111,7 +110,6 @@ export class CurrencyCore {
             });
         }
 
-
         return matches;
     };
 
@@ -148,9 +146,7 @@ export class CurrencyCore {
         for (let i = 0; i < bPairs.length; i++) {
             const bPairTicker = bPairs[i];
 
-
             bPairTicker.key = bPairTicker.symbol.replace(keys.b, '') as CurrencyNameT;
-
 
             // from B to C
             bPairTicker.startsWithKey = bPairTicker.symbol.startsWith(keys.b);
@@ -158,63 +154,65 @@ export class CurrencyCore {
             // from C to B
             bPairTicker.endsWithKey = bPairTicker.symbol.endsWith(keys.b);
 
-            if (aKeys[bPairTicker.key]) {
-                const match = bPairTicker;
+            if (bPairTicker.trades > -1) {
+                if (aKeys[bPairTicker.key]) {
+                    const match = bPairTicker;
+
+                    const stepC = this.getCurrencyFromStream(stream, match.key, keys.a);
+
+                    // only do this if we definitely found a path. Some paths are impossible, so will result in an empty stepC quote.
+                    if (stepC) {
+                        keys.c = match.key;
+
+                        const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
 
 
-                const stepC = this.getCurrencyFromStream(stream, match.key, keys.a);
+                        if (comparison) {
 
-                // only do this if we definitely found a path. Some paths are impossible, so will result in an empty stepC quote.
-                if (stepC) {
-                    keys.c = match.key;
-
-                    const comparison = this.getArbitrageRate(stream, keys.a, keys.b, keys.c);
-
-                    if (comparison) {
-
-                        const dt = new Date();
-                        const triangle: DynamicCandidateT = {
-                            ws_ts: comparison.a.timestamp,
-                            ts: +dt,
-                            dt: dt,
-                            // these are for storage later
-                            a: comparison.a,//full ticker for first pair (BTC->BNB)
-                            a_symbol: comparison.a.symbol,
-                            a_step_from: comparison.a.stepFrom,//btc
-                            a_step_to: comparison.a.stepTo,//bnb
-                            a_step_type: comparison.a.tradeInfo?.side,
-                            a_bid_price: comparison.a.bidPrice,
-                            a_bid_quantity: comparison.a.bidQuantity,
-                            a_ask_price: comparison.a.askPrice,
-                            a_ask_quantity: comparison.a.askQuantity,
-                            a_volume: comparison.a.volume,
-                            a_trades: comparison.a.trades,
-                            b: comparison.b,
-                            b_symbol: comparison.b.symbol,
-                            b_step_from: comparison.b.stepFrom,
-                            b_step_to: comparison.b.stepTo,
-                            b_step_type: comparison.b.tradeInfo.side,
-                            b_bid_price: comparison.b.bidPrice,
-                            b_bid_quantity: comparison.b.bidQuantity,
-                            b_ask_price: comparison.b.askPrice,
-                            b_ask_quantity: comparison.b.askQuantity,
-                            b_volume: comparison.b.volume,
-                            b_trades: comparison.b.trades,
-                            c: comparison.c,
-                            c_symbol: comparison.c.symbol,
-                            c_step_from: comparison.c.stepFrom,
-                            c_step_to: comparison.c.stepTo,
-                            c_step_type: comparison.c.tradeInfo.side,
-                            c_bid_price: comparison.c.bidPrice,
-                            c_bid_quantity: comparison.c.bidQuantity,
-                            c_ask_price: comparison.c.askPrice,
-                            c_ask_quantity: comparison.c.askQuantity,
-                            c_volume: comparison.c.volume,
-                            c_trades: comparison.c.trades,
-                            rate: comparison.rate,
-                        };
-                        // debugger;
-                        bMatches.push(triangle);
+                            const dt = new Date();
+                            const triangle: DynamicCandidateT = {
+                                ws_ts: comparison.a.timestamp,
+                                ts: +dt,
+                                dt: dt,
+                                // these are for storage later
+                                a: comparison.a,//full ticker for first pair (BTC->BNB)
+                                a_symbol: comparison.a.symbol,
+                                a_step_from: comparison.a.stepFrom,//btc
+                                a_step_to: comparison.a.stepTo,//bnb
+                                a_step_type: comparison.a.tradeInfo?.side,
+                                a_bid_price: comparison.a.bidPrice,
+                                a_bid_quantity: comparison.a.bidQuantity,
+                                a_ask_price: comparison.a.askPrice,
+                                a_ask_quantity: comparison.a.askQuantity,
+                                a_volume: comparison.a.volume,
+                                a_trades: comparison.a.trades,
+                                b: comparison.b,
+                                b_symbol: comparison.b.symbol,
+                                b_step_from: comparison.b.stepFrom,
+                                b_step_to: comparison.b.stepTo,
+                                b_step_type: comparison.b.tradeInfo.side,
+                                b_bid_price: comparison.b.bidPrice,
+                                b_bid_quantity: comparison.b.bidQuantity,
+                                b_ask_price: comparison.b.askPrice,
+                                b_ask_quantity: comparison.b.askQuantity,
+                                b_volume: comparison.b.volume,
+                                b_trades: comparison.b.trades,
+                                c: comparison.c,
+                                c_symbol: comparison.c.symbol,
+                                c_step_from: comparison.c.stepFrom,
+                                c_step_to: comparison.c.stepTo,
+                                c_step_type: comparison.c.tradeInfo.side,
+                                c_bid_price: comparison.c.bidPrice,
+                                c_bid_quantity: comparison.c.bidQuantity,
+                                c_ask_price: comparison.c.askPrice,
+                                c_ask_quantity: comparison.c.askQuantity,
+                                c_volume: comparison.c.volume,
+                                c_trades: comparison.c.trades,
+                                rate: comparison.rate,
+                            };
+                            // debugger;
+                            bMatches.push(triangle);
+                        }
                     }
                 }
             }

@@ -50,7 +50,7 @@ export class UI {
 
     };
 
-    updateArbitrageOpportunities = (tickers?: CandidateT) => {
+    updateArbitrageOpportunities = (tickers?: CandidateT[]) => {
 
 
         if (!this.outputBuffer || !tickers) {
@@ -81,16 +81,16 @@ export class UI {
                 const fRate2 = rate - fees2;
 
                 new Line(this.outputBuffer)
-                    .column(ticker.a.key.toString(), this.cols[0], [cyan])
-                    .column(ticker.b.stepFrom.toString(), this.cols[0], [cyan])
-                    .column(ticker.c.stepFrom.toString(), this.cols[0], [cyan])
+                    .column(ticker.a.key, this.cols[0], [cyan])
+                    .column(ticker.b.stepFrom, this.cols[0], [cyan])
+                    .column(ticker.c.stepFrom, this.cols[0], [cyan])
 
-                    .column(rate.toFixed(3).toString() + '%', this.cols[1], [cyan])
-                    .column(fees1.toFixed(3).toString() + '%', this.cols[1], [cyan])
-                    .column(fRate1.toFixed(3).toString() + '%', 20, [color])
+                    .column(rate.toFixed(3) + '%', this.cols[1], [cyan])
+                    .column(fees1.toFixed(3) + '%', this.cols[1], [cyan])
+                    .column(fRate1.toFixed(3) + '%', 20, [color])
 
-                    .column(fees2.toFixed(3).toString() + '%', 17, [cyan])
-                    .column(fRate2.toFixed(3).toString() + '%', 20, [color])
+                    .column(fees2.toFixed(3) + '%', 17, [cyan])
+                    .column(fRate2.toFixed(3) + '%', 20, [color])
 
                     .fill()
                     .store();
