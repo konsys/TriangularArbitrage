@@ -1,18 +1,15 @@
 import {Line, LineBuffer} from 'clui';
 import {cyan, green, red} from 'cli-color';
-import {CandidateT} from "./types";
+import {BotOptions, CandidateT} from "./types";
 
 export class UI {
-    options: any
-    outputBuffer: any
+    options: BotOptions
+    outputBuffer: LineBuffer
     cols: number[]
     maxRows: number = 5
 
-    constructor(options) {
+    constructor(options: BotOptions) {
         this.options = options;
-
-        console.log(options)
-        console.log()
 
         this.outputBuffer = new LineBuffer({
             x: 0,
